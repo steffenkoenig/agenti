@@ -36,19 +36,20 @@ Then execute the task list:
 - Add or update documentation as described.
 - Verify the implementation satisfies the acceptance criteria.
 
-### 3. Commit and push after each issue
+### 3. Create a pull request for each issue
 
 After completing all changes for an issue:
 
+- Create a local branch using a meaningful name that references the issue number, e.g.:
+  ```
+  git checkout -b fix/issue-42-login-redirect
+  ```
 - Stage all changed files.
 - Commit with a meaningful message referencing the issue number, e.g.:
   ```
   fix: resolve login redirect loop (#42)
   ```
-- Push the commit to the working branch so the changes are persisted, e.g.:
-  ```
-  git push origin HEAD
-  ```
+- Do **not** push the branch directly. Instead, use the `create_pull_request` tool from the safeoutputs MCP server to create a pull request with your committed changes. The tool will push the branch and open the PR for you.
 
 ### 4. Continue to the next issue
 
@@ -57,7 +58,7 @@ Repeat step 2–3 for each of the remaining selected issues.
 ## Constraints
 
 - Implement at most **10 issues** per run.
-- Do not open or close issues; only implement them.
-- Do not merge branches or open pull requests; only commit and push to the working branch.
+- Do not open or close issues directly; submit changes via pull requests using the `create_pull_request` safe-output tool.
 - If an issue cannot be implemented safely (e.g. insufficient context, missing dependencies, risk of data loss), skip it and log a brief reason.
 - Prefer small, focused commits over large sweeping changes.
+- If no actionable issues are found, call the `noop` safe-output tool with a brief explanation.
