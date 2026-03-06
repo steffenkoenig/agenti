@@ -1,7 +1,7 @@
 ---
 name: "Repository Sentinel"
 on:
-  schedule: every week
+  schedule: every 168h
   workflow_dispatch:
 concurrency:
   group: agenti-reviewer
@@ -9,15 +9,15 @@ concurrency:
 if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
 permissions:
   contents: read
-  issues: write
+  issues: read
   pull-requests: read
 engine:
   id: copilot
   agent: agenti-reviewer
 safe-outputs:
-  create_issue:
+  create-issue:
     max: 15
-  add_comment:
+  add-comment:
     max: 5
   noop:
     max: 1
