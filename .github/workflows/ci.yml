@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  yaml-lint:
+    name: YAML Lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Lint YAML files
+        run: |
+          # Lint all hand-authored and auto-generated YAML files in the repo.
+          find .github/workflows -name '*.yml' | sort | xargs yamllint -c .yamllint.yml
+
+  agent-frontmatter:
+    name: Agent Frontmatter Validation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Validate agent and workflow frontmatter
+        run: python3 .github/scripts/check-frontmatter.py
+
+  url-check:
+    name: URL Validation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check URLs in agent and workflow files
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # Check agent files and workflow markdown files only.
+          # Private/inaccessible URLs (e.g. internal GitHub enterprise docs)
+          # are excluded via --exclude below; the step is non-blocking so that
+          # a temporarily unavailable URL does not break every PR.
+          args: >-
+            --verbose
+            --no-progress
+            --timeout 30
+            --exclude "github\.github\.com"
+            .github/agents
+            .github/workflows
+          fail: false
