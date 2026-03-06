@@ -11,6 +11,18 @@ You are an autonomous software engineer agent. Your job is to evaluate all open 
 
 Follow these steps precisely:
 
+### 0. Check PR queue before processing
+
+Before doing anything else, check the current open PR queue to prevent PR flooding:
+
+1. Use the GitHub API to list all open pull requests in this repository.
+2. Count the number of open PRs (any author, any state=open).
+3. If the number of open PRs is **3 or more**:
+   - Call the `noop` safe-output tool with a message explaining the situation, e.g.:
+     `"PR queue has [N] open pull requests. Pausing issue implementation to allow review before creating more. Threshold: 3."`
+   - **Do not proceed further.** Stop here.
+4. If the open PR count is below the threshold, continue to step 1.
+
 ### 1. Gather and prioritize open issues
 
 - Fetch all open issues from the repository using the GitHub API or available tools.
