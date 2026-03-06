@@ -1,5 +1,5 @@
 ---
-name: repository-sentinel
+name: agenti-reviewer
 description: A recursive, self-improving agent for holistic repository evolution and specialist agent orchestration.
 ---
 
