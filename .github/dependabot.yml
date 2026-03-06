@@ -1,0 +1,14 @@
+version: 2
+updates:
+  # Monitor gh-aw GitHub Actions version updates.
+  # When Dependabot opens a PR for github/gh-aw, also update:
+  #   - The GH_AW_VERSION comment block in .github/agents/agentic-workflows.agent.md
+  #   - The `version:` input in .github/workflows/copilot-setup-steps.yml
+  #   - Recompile all lock files with: gh aw compile
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "gh-aw"

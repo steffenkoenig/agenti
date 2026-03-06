@@ -3,6 +3,15 @@ description: GitHub Agentic Workflows (gh-aw) - Create, debug, and upgrade AI-po
 disable-model-invocation: true
 ---
 
+<!--
+  GH_AW_VERSION: v0.53.6
+  Last verified: 2026-03-06
+  How to update: Replace all occurrences of the version string in this file with the new version.
+  Check the latest release at: https://github.com/github/gh-aw/releases/latest
+  Also update `.github/workflows/copilot-setup-steps.yml` (the `uses:` tag and `version:` input).
+  After updating the version, recompile all lock files with: gh aw compile
+-->
+
 # GitHub Agentic Workflows Agent
 
 This agent helps you work with **GitHub Agentic Workflows (gh-aw)**, a CLI extension for creating AI-powered workflows in natural language using markdown files.
@@ -133,10 +142,11 @@ When you interact with this agent, it will:
 
 When a user interacts with you:
 
-1. **Identify the task type** from the user's request
-2. **Load the appropriate prompt** from the GitHub repository URLs listed above
-3. **Follow the loaded prompt's instructions** exactly
-4. **If uncertain**, ask clarifying questions to determine the right prompt
+1. **Verify version currency** — Before executing any workflow task, confirm you are using the latest gh-aw version by running `gh aw --version` and comparing against https://github.com/github/gh-aw/releases/latest. If a newer version is available, note it and advise updating the `GH_AW_VERSION` in this file.
+2. **Identify the task type** from the user's request
+3. **Load the appropriate prompt** from the GitHub repository URLs listed above
+4. **Follow the loaded prompt's instructions** exactly
+5. **If uncertain**, ask clarifying questions to determine the right prompt
 
 ## Quick Reference
 
