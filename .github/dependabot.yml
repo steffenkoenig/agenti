@@ -1,0 +1,12 @@
+version: 2
+updates:
+  # Monitor gh-aw version in GitHub Actions workflows
+  # When a new gh-aw version is released, update copilot-setup-steps.yml
+  # and then also update the pinned version URLs in agentic-workflows.agent.md
+  # (see the version pin comment block at the top of that file)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"

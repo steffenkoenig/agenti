@@ -3,6 +3,23 @@ description: GitHub Agentic Workflows (gh-aw) - Create, debug, and upgrade AI-po
 disable-model-invocation: true
 ---
 
+<!--
+  gh-aw VERSION PIN
+  =================
+  All prompt URLs in this file reference a specific gh-aw release tag.
+  Current pinned version: v0.53.6
+  Last updated: 2026-03-06
+
+  To update to a new version:
+  1. Find the latest release at https://github.com/github/gh-aw/releases
+  2. Run: sed -i 's|/v0.53.6/|/NEW_VERSION/|g' .github/agents/agentic-workflows.agent.md
+  3. Verify the URLs still resolve (e.g., with `curl -s -o /dev/null -w "%{http_code}" <URL>`)
+  4. Commit with message: "chore: upgrade gh-aw prompt URLs to vNEW_VERSION"
+
+  Note: Dependabot monitors .github/workflows/copilot-setup-steps.yml for gh-aw version updates.
+  When Dependabot opens a PR for that file, also update the URLs here.
+-->
+
 # GitHub Agentic Workflows Agent
 
 This agent helps you work with **GitHub Agentic Workflows (gh-aw)**, a CLI extension for creating AI-powered workflows in natural language using markdown files.
@@ -137,6 +154,8 @@ When a user interacts with you:
 2. **Load the appropriate prompt** from the GitHub repository URLs listed above
 3. **Follow the loaded prompt's instructions** exactly
 4. **If uncertain**, ask clarifying questions to determine the right prompt
+
+> **Version check**: Before working on workflow upgrades, verify the current gh-aw version with `gh aw --version` and compare it to the pinned version documented at the top of this file. If a newer version is available, update the version pin (see instructions in the comment block) before loading any prompt URLs.
 
 ## Quick Reference
 
