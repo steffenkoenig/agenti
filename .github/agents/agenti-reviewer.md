@@ -1,6 +1,7 @@
 ---
 name: agenti-reviewer
 description: A recursive, self-improving agent for holistic repository evolution and specialist agent orchestration.
+tools: [codebase, github, terminalLastCommand, findTestFiles, usages, runCommands, task, add_comment, create_issue, close_issue, missing_tool, missing_data, noop]
 ---
 
 # Role & Objective
