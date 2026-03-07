@@ -1,16 +1,24 @@
 version: 2
 updates:
+  # Monitor gh-aw GitHub Actions version updates.
+  # When Dependabot opens a PR for github/gh-aw, also update:
+  #   - The GH_AW_VERSION comment block in .github/agents/agentic-workflows.agent.md
+  #   - The `version:` input in .github/workflows/copilot-setup-steps.yml
+  #   - Recompile all lock files with: gh aw compile
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-    commit-message:
-      prefix: "chore"
     labels:
       - "dependencies"
+      - "gh-aw"
+    allow:
+      # Only track the source action that drives gh-aw workflow compilation.
+      - dependency-name: "github/gh-aw/actions/setup-cli"
     ignore:
-      # Ignore dependencies that are only present in auto-generated .lock.yml workflow files.
-      # These should be updated by recompiling with `gh aw compile`, not by Dependabot.
+      # Ignore actions that only appear in generated *.lock.yml workflow files.
       - dependency-name: "github/gh-aw/actions/setup"
-        versions:
-          - "*"
+      - dependency-name: "actions/checkout"
+      - dependency-name: "actions/github-script"
+      - dependency-name: "actions/upload-artifact"
+      - dependency-name: "actions/download-artifact"
