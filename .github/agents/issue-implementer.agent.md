@@ -13,15 +13,20 @@ Follow these steps precisely:
 
 ### 0. Check PR queue before processing
 
-Before doing anything else, check the current open PR queue to prevent PR flooding:
+The maximum number of open agent-created PRs allowed before pausing is configurable via the `MAX_OPEN_AGENT_PRS` workflow variable (default: **3**).
 
-1. Use the GitHub API to list all open pull requests in this repository.
-2. Count the number of open PRs (any author, any state=open).
-3. If the number of open PRs is **3 or more**:
+Before doing anything else, obtain an **exact** count of open PRs created by this agent to prevent PR flooding:
+
+1. Use the GitHub Search API (`GET /search/issues`) with the query:
+   `type:pr state:open repo:OWNER/REPO author:app/github-actions`
+   and read the `total_count` field. This avoids pagination errors and gives an accurate total.
+   - If the Search API is unavailable, fall back to calling `GET /repos/{owner}/{repo}/pulls?state=open&per_page=100` and **follow all `Link: rel="next"` pagination pages** before summing results, filtering for PRs whose `user.login` is `github-actions[bot]`.
+2. Let `N` be the exact count of open agent-created PRs.
+3. If `N` is **3 or more** (or the configured `MAX_OPEN_AGENT_PRS` threshold):
    - Call the `noop` safe-output tool with a message explaining the situation, e.g.:
-     `"PR queue has [N] open pull requests. Pausing issue implementation to allow review before creating more. Threshold: 3."`
+     `"Agent PR queue has [N] open pull requests created by this workflow. Pausing issue implementation to allow review before creating more. Threshold: 3."`
    - **Do not proceed further.** Stop here.
-4. If the open PR count is below the threshold, continue to step 1.
+4. If `N` is below the threshold, continue to step 1.
 
 ### 1. Gather and prioritize open issues
 
