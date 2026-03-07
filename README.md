@@ -185,11 +185,11 @@ After editing an agent file, simply commit your changes. Recompilation is only r
 
 ## Contributing
 
-1. **Open an issue** — describe the bug, enhancement, or question. The Agenti Reviewer will periodically audit the repo and may open issues automatically too.
-2. **Fork & branch** — create a feature branch from `main`.
-3. **Make changes** — follow the existing code style; keep commits small and focused.
-4. **Compile workflows** — if you edit any `.github/workflows/*.md` file, run `gh aw compile` and commit the resulting `.lock.yml`.
-5. **Open a pull request** — reference the related issue in the PR description.
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidance on editing agent instructions, compiling workflows, testing changes, and PR conventions.
+
+## License
 
 This project is licensed under the [MIT License](LICENSE).
 > **Note:** The Issue Implementer agent runs every two hours and may implement open issues automatically.
