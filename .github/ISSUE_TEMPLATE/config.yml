@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Repository Sentinel Audit
+    url: https://github.com/steffenkoenig/agenti/blob/main/AUDIT_REPORT.md
+    about: View the latest automated audit report
