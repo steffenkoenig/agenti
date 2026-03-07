@@ -57,11 +57,33 @@ Skip generated files (`*.lock.yml`, `node_modules/`, build artifacts) — do not
 1. **Ingest & Map:** Map file structures, entry points, and dependencies between code and AI agents.
 2. **Recursive Reflection:** Evaluate if your current tools/instructions are sufficient for the tasks at hand.
 3. **Cross-Reference:** Check how a change in a "Skill" file impacts an "Agent" prompt or a "Test" suite.
+4. **Triage & Issue Creation:** Every finding must be translated into a formal GitHub Issue, following the **Deduplication Protocol** below before creating any new issue.
+
+---
+
+# Deduplication Protocol
+
+Before creating any GitHub Issue, you **must** perform a duplicate check:
+
+1. **Search existing open issues** using the `github` tool with keywords extracted from your finding's title and core topic (e.g. search for "missing README", "O(n^2)", "test coverage"), and record the issue numbers (`issue_number`) of all plausible matches.
+2. **Evaluate overlap** between the candidate finding and each existing issue returned. Calculate overlap as the proportion of significant keywords (title words, technical terms, affected files/agents) shared between the candidate and the existing issue, divided by the total unique keywords across both — i.e. Jaccard similarity on the tokenized keyword sets (remove common English stop-words such as "the", "a", "is", "in", "of", "and", "to", "for", "with", "that", "it", "be"). These thresholds were chosen to match the ≥80% duplicate confidence described in the issue requirements and may be tuned as experience accumulates:
+   - If **Jaccard similarity ≥ 0.80**: treat as a **duplicate**.
+   - If **0.40 ≤ Jaccard similarity < 0.80**: treat as a **related issue** (different scope but same area).
+   - If **Jaccard similarity < 0.40**: treat as a **new issue**.
+3. **Act based on the result:**
+   - **Duplicate (sim ≥ 0.80):** Do **not** create a new issue. Instead, use `add_comment` to post your new findings as an update on the existing issue, passing the existing issue number as the `item_number` argument in the `add_comment` tool call. Also reference the existing issue number in your comment body for clarity.
+   - **Related (0.40 ≤ sim < 0.80):** Create a new issue but reference the related issue in the "Relations & Dependencies" section.
+   - **New (sim < 0.40):** Create a new issue normally using `create_issue`.
+4. **Handling ambiguous cases:** If the similarity score is borderline (within 0.05 of a threshold), or if the existing issue has a title consisting of fewer than 4 meaningful keywords and the proposed issue body covers substantially different files or components, apply the following tie-breaking rules:
+   - Prefer `add_comment` over `create_issue` when in doubt — adding a comment is reversible and avoids tracker clutter, but you **must** still explicitly pass the target issue number as `item_number` when calling `add_comment`.
+   - If the existing issue is closed, treat it as non-existent and create a new issue.
+   - If multiple existing issues match at similar scores, comment on the most recently updated one and reference the others, always using its issue number as the `item_number` in `add_comment`.
 4. **Triage & Filtered Issue Creation:** For every finding, apply the following gate before creating an issue:
    - **Confidence Score:** Rate the finding as **High**, **Medium**, or **Low** confidence based on evidence clarity and impact certainty.
    - **Deduplication Check:** Extract keywords from the finding (same method as step 0). Compare against the pre-run index. A finding is a **Duplicate** if it shares 3 or more keywords with an existing open issue, or if the existing issue title contains the primary subject of the finding. When a duplicate is detected, note the existing issue number.
    - **Creation Threshold:** Only create a GitHub Issue if the finding is rated **High** confidence AND is not a duplicate. Exception: if the repository has zero open issues, also create **Medium** confidence findings.
    - **Skipped Findings Log:** Collect all skipped findings (duplicates or low/medium confidence) into a summary for the session report.
+6. **Never create a new issue without first completing steps 1–4.**
 
 ---
 
