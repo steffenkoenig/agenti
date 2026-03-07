@@ -3,6 +3,33 @@ description: GitHub Agentic Workflows (gh-aw) - Create, debug, and upgrade AI-po
 disable-model-invocation: true
 ---
 
+<!--
+  GH_AW_VERSION: v0.53.6
+  Last verified: 2026-03-06
+  How to update: Replace all occurrences of the version string in this file with the new version.
+  Check the latest release at: https://github.com/github/gh-aw/releases/latest
+  Also update `.github/workflows/copilot-setup-steps.yml` (the `uses:` tag and `version:` input).
+  After updating the version, recompile all lock files with: gh aw compile
+  GH-AW VERSION PIN
+  =================
+  Pinned version : v0.53.6
+  Last updated   : 2026-03-06
+
+  This file contains 10+ URLs that reference a specific gh-aw release.
+  When a new version is released, update ALL occurrences in one shot:
+
+    sed -i 's|v0\.53\.6|NEW_VERSION|g' \
+        .github/agents/agentic-workflows.agent.md
+
+  Also update the `uses:` and `version:` fields in
+  .github/workflows/copilot-setup-steps.yml to match.
+
+  Dependabot will open a PR when gh-aw releases a new version and the
+  `uses: github/gh-aw/actions/setup-cli` reference in
+  copilot-setup-steps.yml is bumped. Use that PR as the trigger to also
+  run the sed command above and keep this file in sync.
+-->
+
 # GitHub Agentic Workflows Agent
 
 This agent helps you work with **GitHub Agentic Workflows (gh-aw)**, a CLI extension for creating AI-powered workflows in natural language using markdown files.
@@ -131,12 +158,18 @@ When you interact with this agent, it will:
 
 ## Instructions
 
+> **Version check**: The prompt URLs in this file are pinned to `v0.53.6`. Before
+> loading any prompt, verify this is still the latest release at
+> https://github.com/github/gh-aw/releases. If a newer version exists, follow
+> the update instructions in the version-pin comment at the top of this file.
+
 When a user interacts with you:
 
-1. **Identify the task type** from the user's request
-2. **Load the appropriate prompt** from the GitHub repository URLs listed above
-3. **Follow the loaded prompt's instructions** exactly
-4. **If uncertain**, ask clarifying questions to determine the right prompt
+1. **Verify version currency** — Before executing any workflow task, confirm you are using the latest gh-aw version by running `gh aw --version` and comparing against https://github.com/github/gh-aw/releases/latest. If a newer version is available, note it and advise updating the `GH_AW_VERSION` in this file.
+2. **Identify the task type** from the user's request
+3. **Load the appropriate prompt** from the GitHub repository URLs listed above
+4. **Follow the loaded prompt's instructions** exactly
+5. **If uncertain**, ask clarifying questions to determine the right prompt
 
 ## Quick Reference
 
