@@ -191,4 +191,5 @@ After editing an agent file, simply commit your changes. Recompilation is only r
 4. **Compile workflows** — if you edit any `.github/workflows/*.md` file, run `gh aw compile` and commit the resulting `.lock.yml`.
 5. **Open a pull request** — reference the related issue in the PR description.
 
+This project is licensed under the [MIT License](LICENSE).
 > **Note:** The Issue Implementer agent runs every two hours and may implement open issues automatically.
