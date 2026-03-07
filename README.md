@@ -80,4 +80,4 @@ gh run list --workflow "Issue Implementer"
 
 ## License
 
-No license has been specified for this project. All rights are reserved by the author unless otherwise stated.
+This project is licensed under the [MIT License](LICENSE).
