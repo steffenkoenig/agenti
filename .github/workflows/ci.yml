@@ -15,10 +15,10 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install yamllint
-        run: pip install yamllint
+        run: python3 -m pip install yamllint
 
       - name: Lint YAML files
         run: |
@@ -32,10 +32,10 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install PyYAML
-        run: pip install pyyaml
+        run: python3 -m pip install pyyaml
 
       - name: Validate agent and workflow frontmatter
         run: python3 .github/scripts/check-frontmatter.py
@@ -47,20 +47,20 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Check URLs in agent and workflow files
         uses: lycheeverse/lychee-action@v2
         with:
-          # Check agent files and workflow markdown files only.
-          # Private/inaccessible URLs (e.g. internal GitHub enterprise docs)
-          # are excluded via --exclude below; the step is non-blocking so that
-          # a temporarily unavailable URL does not break every PR.
+          # Scan only Markdown files to avoid noisy/unreachable URLs embedded
+          # in the auto-generated *.lock.yml files (e.g. docker-internal hosts).
+          # The step is non-blocking so a temporarily unavailable URL does not
+          # break every PR.
           args: >-
             --verbose
             --no-progress
             --timeout 30
             --exclude "github\.github\.com"
-            .github/agents
-            .github/workflows
+            .github/agents/**/*.md
+            .github/workflows/*.md
           fail: false

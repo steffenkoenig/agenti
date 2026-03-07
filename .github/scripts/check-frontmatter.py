@@ -28,24 +28,54 @@ def parse_frontmatter(filepath):
     Returns:
         dict   – parsed frontmatter on success
         None   – file has no frontmatter delimiters
-        False  – frontmatter contains invalid YAML
+        False  – frontmatter contains invalid YAML or a non-mapping value
     """
     with open(filepath, "r", encoding="utf-8") as f:
-        content = f.read()
+        lines = f.readlines()
 
-    if not content.startswith("---"):
+    if not lines:
         return None
 
-    end = content.find("---", 3)
-    if end == -1:
+    # Require the first non-empty line to be a frontmatter opening delimiter.
+    start_index = None
+    for idx, line in enumerate(lines):
+        if line.strip() == "":
+            continue
+        if line.strip() == "---":
+            start_index = idx
+        break
+
+    if start_index is None:
         return None
 
-    frontmatter_str = content[3:end].strip()
+    # Find the closing delimiter line after the opening delimiter.
+    end_index = None
+    for idx in range(start_index + 1, len(lines)):
+        if lines[idx].strip() == "---":
+            end_index = idx
+            break
+
+    if end_index is None:
+        return None
+
+    frontmatter_str = "".join(lines[start_index + 1 : end_index]).strip()
     try:
-        return yaml.safe_load(frontmatter_str) or {}
+        parsed = yaml.safe_load(frontmatter_str)
     except yaml.YAMLError as exc:
         print(f"  ERROR: Invalid YAML frontmatter in {filepath}: {exc}")
         return False
+
+    if parsed is None:
+        return {}
+
+    if not isinstance(parsed, dict):
+        print(
+            f"  ERROR: Frontmatter in {filepath} parsed to {type(parsed).__name__},"
+            " expected a mapping."
+        )
+        return False
+
+    return parsed
 
 
 def check_agent_files():
