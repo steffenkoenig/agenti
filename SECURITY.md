@@ -14,7 +14,7 @@ Only the latest code on the `main` branch is actively maintained. No legacy vers
 
 ## Reporting a Vulnerability
 
-We take security vulnerabilities seriously, especially given that **agenti** is an autonomous agent with access to a `COPILOT_GITHUB_TOKEN` and the ability to create pull requests, comment on issues, and interact with the GitHub API on a scheduled basis.
+We take security vulnerabilities seriously, especially given that **agenti** is an autonomous agent with access to a `COPILOT_GITHUB_TOKEN` for GitHub Copilot inference and separate GitHub API credentials (such as `GITHUB_TOKEN` or the MCP server token) that allow it to create pull requests, comment on issues, and interact with the GitHub API on a scheduled basis.
 
 ### How to Report
 
