@@ -2,10 +2,114 @@
 
 ## Supported Versions
 
+The following versions of **agenti** are currently supported with security updates:
+
 | Version | Supported          |
 | ------- | ------------------ |
 | main    | :white_check_mark: |
 
+Only the latest code on the `main` branch is actively maintained. No legacy version branches are currently supported.
+
+---
+
+## Reporting a Vulnerability
+
+We take security vulnerabilities seriously, especially given that **agenti** is an autonomous agent with access to a `COPILOT_GITHUB_TOKEN` for GitHub Copilot inference and separate GitHub API credentials (such as `GITHUB_TOKEN` or the MCP server token) that allow it to create pull requests, comment on issues, and interact with the GitHub API on a scheduled basis.
+
+### How to Report
+
+**Please do NOT open a public GitHub Issue for security vulnerabilities.**
+
+Instead, use **[GitHub Private Vulnerability Reporting](../../security/advisories/new)** to disclose vulnerabilities privately:
+
+1. Navigate to the **Security → Advisories** tab of this repository and click **"Report a vulnerability"**.
+2. Fill in the details described in the [What to Include](#what-to-include-in-a-report) section below.
+
+If you are unable to use GitHub's private reporting, you may contact the repository owner directly via GitHub ([@steffenkoenig](https://github.com/steffenkoenig)).
+
+---
+
+## Expected Response Timeline
+
+| Action                              | Target Timeframe |
+| ----------------------------------- | ---------------- |
+| Acknowledgement of report           | Within 3 days    |
+| Initial triage and severity rating  | Within 7 days    |
+| Fix or mitigation plan communicated | Within 14 days   |
+| Patch released (for valid issues)   | Within 30 days   |
+
+We will keep you informed throughout the process. If you have not received a response within the expected timeframe, please follow up.
+
+---
+
+## What to Include in a Report
+
+To help us triage and reproduce the vulnerability quickly, please include:
+
+- **Description**: A clear summary of the vulnerability and its potential impact.
+- **Affected component**: Which file(s), workflow(s), or agent(s) are involved (e.g., `issue-implementer.agent.md`, `agenti-reviewer.agent.md`).
+- **Steps to reproduce**: A minimal, reproducible sequence of steps or a proof-of-concept.
+- **Impact**: What an attacker could achieve by exploiting this issue (e.g., token exfiltration, unauthorized code commits, prompt injection).
+- **Suggested fix** (optional): If you have a proposed mitigation or patch.
+
+---
+
+## AI Agent-Specific Security Concerns
+
+**agenti** uses Large Language Model (LLM)-based agents to autonomously process GitHub issues and create pull requests. This introduces attack vectors that are specific to AI-powered systems.
+
+### Prompt Injection
+
+Prompt injection occurs when untrusted input (e.g., issue titles, issue bodies, PR descriptions, or code comments) manipulates the agent's instructions in unintended ways.
+
+**Risk**: A malicious actor could craft a GitHub Issue with content designed to override agent instructions — for example, instructing the agent to exfiltrate secrets, modify unrelated files, or bypass safety constraints.
+
+**Mitigations in place**:
+- Agent instructions are defined in structured files under `.github/agents/` (using either a `.md` or `.agent.md` extension, e.g., `agenti-reviewer.md`, `issue-implementer.agent.md`) with explicit safe-output constraints declared per workflow.
+- The `safe-outputs` system limits permitted actions on a per-workflow basis — for example, the `agenti-reviewer` workflow may only create issues and add comments, while `issue-implementer` may only create pull requests and add comments. Neither workflow can perform arbitrary API calls beyond these defined outputs.
+- Agents do not have direct `git push` access; all code changes go through pull requests that can be reviewed before merging.
+
+**Please report** any issue or pull request content that you believe could be used as a prompt injection payload.
+
+### Token Permission Model
+
+This repository uses a **two-token model** in its agentic workflows:
+
+- `COPILOT_GITHUB_TOKEN` is provided to the Copilot/agent engine for generating plans and code, but it is **not** the primary token used to perform GitHub API operations on the repository.
+- Separate GitHub tokens (e.g., `GITHUB_MCP_SERVER_TOKEN`, `GH_AW_GITHUB_TOKEN`, `GITHUB_TOKEN`) are used by workflows to call the GitHub API and carry out repository-level actions (issues, pull requests, code changes).
+
+Key facts about these GitHub API tokens:
+
+- They are scoped to repository-level operations and do **not** have organization-level administrative permissions.
+- They are stored as GitHub Actions secrets; GitHub automatically redacts their values from logs, and workflows are designed not to print raw token values (only derived data such as API responses or status messages).
+- All agent actions are limited by the `safe-outputs` mechanism defined in each workflow.
+
+If you believe any of these tokens are over-privileged, mis-scoped, or have been exposed, please report it immediately using the private disclosure process above.
+
+---
+
+## Out of Scope
+
+The following are **not** considered security vulnerabilities for this project:
+
+- Issues that require the attacker to already have write access to the repository.
+- Theoretical vulnerabilities with no realistic exploit path.
+- Rate limiting or denial-of-service on the GitHub API (report these to GitHub directly).
+- Bugs in GitHub Actions itself (report these to GitHub).
+- Issues in third-party actions or dependencies that are not modified by this repository.
+
+---
+
+## Disclosure Policy
+
+We follow a **coordinated disclosure** model:
+
+1. Reporter submits a private report.
+2. We triage, confirm, and develop a fix.
+3. Once a fix is released, we will credit the reporter in the security advisory (unless they prefer to remain anonymous).
+4. Public disclosure happens after the fix is available.
+
+Thank you for helping keep **agenti** and its users safe.
 ## Reporting a Vulnerability
 
 **Please do not report security vulnerabilities through public GitHub issues.**
