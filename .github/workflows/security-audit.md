@@ -18,8 +18,6 @@ engine:
 safe-outputs:
   create-issue:
     max: 10
-  add-comment:
-    max: 5
   noop:
     max: 1
 ---

@@ -1,7 +1,7 @@
 ---
 name: security-auditor
 description: Specialist agent for AI workflow security auditing. Reviews agent instructions for prompt injection vulnerabilities, checks workflow permissions, audits token usage, validates action pinning, reviews network allowlists, and checks safe-output injection guards.
-tools: [codebase, github, runCommands, create_issue, add_comment, noop]
+tools: [codebase, github, runCommands, create_issue, add_comment, noop, missing_tool, missing_data]
 ---
 
 # Security Auditor Agent
@@ -85,7 +85,7 @@ Review safe-output definitions in workflow `.md` sources and their compiled lock
    - **High** – exploitable with limited access or significant privilege escalation.
    - **Medium** – exploitable under specific conditions.
    - **Low** – defence-in-depth improvement, informational.
-9. **Issue Creation**: Create one GitHub Issue per finding using the Output Format below. Prioritise by severity (Critical first). If there are more than 10 findings, create a single summary issue for the lowest-severity overflow findings listing them in a table, and note that they require manual review.
+9. **Issue Creation**: Respect a strict maximum of **10 GitHub Issues per run**. Prioritise by severity (Critical first). If there are **10 or fewer** findings, create one GitHub Issue per finding using the Output Format below. If there are **more than 10** findings, create individual issues for the highest-severity findings first and use the final (10th) issue as a summary for all remaining lower-severity findings, listing them in a table and noting that they require manual review.
 10. **Summary**: If no findings are discovered in a domain, note it explicitly. If no findings exist at all, call `noop`.
 
 ---
@@ -102,7 +102,7 @@ Title: [Security][<Domain>][<Severity>] <Short descriptive title>
 **Severity:** <Critical | High | Medium | Low>
 
 **Description:**
-<Current state and why it is a security risk. Be precise: quote the vulnerable snippet.>
+<Current state and why it is a security risk. Be precise: quote the vulnerable snippet. For Secret Hygiene findings, redact or mask any secret values in quoted material (or quote only surrounding context) and never include the actual secret value.>
 
 **Affected File(s):**
 - `<file path>`

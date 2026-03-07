@@ -5,7 +5,7 @@
 This repository contains GitHub Agentic Workflow (gh-aw) configurations and agent instructions. The following components are actively maintained:
 
 | Component | Maintained |
-|---|---|
+| --- | --- |
 | `.github/workflows/*.md` (workflow sources) | ✅ Yes |
 | `.github/workflows/*.lock.yml` (compiled) | ✅ Yes |
 | `.github/agents/*.agent.md` | ✅ Yes |
@@ -35,7 +35,7 @@ Every workflow job requests only the GitHub token permissions it requires. The t
 
 ### Action Pinning
 
-All third-party GitHub Actions (`uses:`) are pinned to a full commit SHA to prevent supply-chain attacks via tag re-pointing. If you observe an action reference that uses a mutable tag or branch name, please report it.
+Where possible, third-party `uses:` references in lock files are pinned to a full commit SHA to prevent supply-chain attacks via tag re-pointing. Some first-party gh-aw actions (for example `github/gh-aw/actions/setup`) intentionally use maintained version tags (such as `v0.53.6`). If you observe an unexpected mutable tag or branch reference in a non-gh-aw action, please report it.
 
 ### Safe Outputs
 
@@ -68,7 +68,7 @@ Findings are reported as GitHub Issues with severity labels.
 
 ### Action SHA Pinning
 
-All `uses:` references in lock files are pinned to full commit SHAs by the `gh aw compile` toolchain. Never edit lock files manually — always recompile from the `.md` source.
+Where possible, third-party `uses:` references in lock files are pinned to full commit SHAs by the `gh aw compile` toolchain. Some first-party gh-aw actions (for example `github/gh-aw/actions/setup`) intentionally use maintained version tags (such as `v0.53.6`). Never edit lock files manually — always recompile from the `.md` source.
 
 ### COPILOT_GITHUB_TOKEN Scope
 
