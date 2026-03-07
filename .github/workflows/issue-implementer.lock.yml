@@ -27,8 +27,8 @@
 name: "Issue Implementer"
 "on":
   schedule:
-  - cron: "43 */2 * * *"
-    # Friendly format: every 2 hours (scattered)
+  - cron: "43 */4 * * *"
+    # Friendly format: every 4 hours (scattered)
   workflow_dispatch:
 
 permissions: {}
