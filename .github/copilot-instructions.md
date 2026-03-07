@@ -45,3 +45,7 @@ For every significant improvement or blocker encountered, you must create a **Gi
 **Impact:** (Critical / Warning / Enhancement)
 **Relations:** List affected files, Agents, or Skills.
 **Proposed Solution:** Step-by-step implementation plan
+**Acceptance Criteria:**
+- [ ] Criterion 1
+- [ ] Criterion 2
+- [ ] Criterion 3
