@@ -18,6 +18,8 @@ safe-outputs:
     max: 5
   add-comment:
     max: 10
+  noop:
+    max: 1
 ---
 
 Run the issue implementer agent to implement open issues in this repository.

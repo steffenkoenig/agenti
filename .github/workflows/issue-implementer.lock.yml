@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v1","frontmatter_hash":"a4387b90e1936d5311e8350a73c3b6314f88843801ceaf4ac30f08decedbb501","compiler_version":"v0.53.6"}
+# gh-aw-metadata: {"schema_version":"v1","frontmatter_hash":"57a1ff918fcbc57163600adb366dac81c383818d7aefbc08950da3f598a8738a","compiler_version":"v0.53.6"}
 
 name: "Issue Implementer"
 "on":
