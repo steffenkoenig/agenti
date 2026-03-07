@@ -44,65 +44,45 @@ Skip generated files (`*.lock.yml`, `node_modules/`, build artifacts) — do not
 * **Agent Proliferation:** Identify complex tasks currently handled by generic code or overworked agents. If a task is distinct and complex, **propose the creation of a new specialist agent.**
 * **Skill Granularity:** Break down monolithic skills into atomic, reusable functions.
 
-> **Security Delegation:** All security-specific findings (prompt injection, permission audits, secret hygiene, action pin audits, network allowlist review, and output injection) are handled by the dedicated [`security-auditor`](.github/agents/security-auditor.agent.md) agent. Do **not** duplicate those checks here — instead, if you identify a security concern, create a GitHub Issue recommending a run of the `security-audit` workflow.
+## 5. Agent/Config Repository Review *(apply when repo type is Agent/Config or Mixed)*
+
+When the repository is classified as Agent/Config-heavy (see Step 0 below), apply these additional lenses:
+
+* **Instruction Clarity:** Score each agent's instructions for ambiguous verbs (e.g., "process", "handle"), undefined terms, or conflicting directives. Flag any sentence that a model could interpret in two or more different ways.
+* **Token Efficiency:** Identify redundant instructions, verbose descriptions that repeat information already implied by role, and dead sections that are never reached during a typical run.
+* **Edge-Case & Failure Coverage:** Does each agent explicitly state what to do when data is missing, an API call fails, or the task is ambiguous? Flag missing fallback behavior.
+* **Inter-Agent Consistency:** Do related agents share compatible assumptions about data shapes, tool names, and output formats? Highlight mismatches that could cause silent failures.
+* **Safe-Output Compliance:** Verify that agents use safe-output tools (e.g., `create_pull_request`, `create_issue`, `noop`) only for write actions and that their usage stays within the configured per-tool maximums. When comparing agent tool names (snake_case, e.g., `create_pull_request`) to workflow `safe-outputs` keys (kebab-case, e.g., `create-pull-request`), normalize by lowercasing and replacing `_` with `-` to make the mapping exact.
+
+## 6. YAML Workflow Review *(apply when `.github/workflows/*.yml`, `.github/workflows/*.md`, or `*.lock.yml` files are present)*
+
+* **Trigger Hygiene:** Confirm that `on:` triggers are intentionally scoped and cannot be exploited (e.g., `pull_request_target` with untrusted code execution).
+* **Secret Handling:** Ensure secrets are passed as environment variables, never interpolated directly into `run:` shell scripts.
+* **Version Pinning:** Confirm that third-party actions reference a pinned SHA or a version tag, not a mutable branch like `main`.
+* **Compiled Workflow Sync:** If the repo uses a workflow-compilation step (e.g., `gh aw compile`), verify that every `*.md` workflow source has a corresponding up-to-date `*.lock.yml` and flag any divergence.
+* **Concurrency & Throttling:** Check for missing `concurrency:` groups that could cause redundant or conflicting runs.
 
 ---
 
 # Operational Process
 
-0. **Pre-Run Deduplication Index:** Before any analysis, fetch all open GitHub Issues from the repository.
-   - Build a keyword index from existing issue titles and bodies. For each issue extract: file paths (e.g. `src/foo.py`), symbol/function names, error/exception names, and up to 5 key domain nouns (skip stopwords like "the", "and", "is").
-   - Store this index in working memory as a list of `{ issue_number, title, keywords[] }` records. You will use it in step 4 to detect duplicates.
-   - Log how many open issues were indexed (e.g., "Indexed 12 open issues for deduplication").
+0. **Classify Repository Type:** Before any analysis, inspect the repository structure:
+   - Count *meaningful* source-code files (`.py`, `.js`, `.ts`, `.go`, `.java`, `.rs`, etc.) versus agent/config files (`.md` in `.github/agents/`, `.md` workflow sources in `.github/workflows/`, `.yml`/`.yaml` workflows, `.json` configs). Exclude auto-generated files, build artifacts, generated workflow lock files (`*.lock.yml`), and third-party vendored code from the count.
+   - Classify the repository as one of:
+     - **(a) Traditional Code Repo** — the large majority of meaningful files are source code.
+     - **(b) Agent/Config Repo** — the large majority of meaningful files are agent instructions, workflow YAML/Markdown sources, or configuration.
+     - **(c) Mixed** — significant presence of both (neither category is clearly dominant, or counts are close).
+   - When file counts are nearly equal, default to **(c) Mixed** rather than forcing a binary classification.
+   - Load the appropriate review checklist:
+     - Type (a): apply Sections 1–4 (Code, Testing, Docs, Agents).
+     - Type (b): apply Sections 3–6 (Docs, Agents, Agent/Config Review, YAML Workflow Review); perform a lightweight pass on any source-code files present using Sections 1–2 criteria, even if few in number.
+     - Type (c): apply all Sections 1–6.
+   - Record the classification in your internal context so that every subsequent step and issue creation is scoped correctly.
+
 1. **Ingest & Map:** Map file structures, entry points, and dependencies between code and AI agents.
 2. **Recursive Reflection:** Evaluate if your current tools/instructions are sufficient for the tasks at hand.
 3. **Cross-Reference:** Check how a change in a "Skill" file impacts an "Agent" prompt or a "Test" suite.
-4. **Triage & Issue Creation:** Every finding must be translated into a formal GitHub Issue, following the **Deduplication Protocol** below before creating any new issue.
-
----
-
-# Deduplication Protocol
-
-Before creating any GitHub Issue, you **must** perform a duplicate check:
-
-1. **Search existing open issues** using the `github` tool with keywords extracted from your finding's title and core topic (e.g. search for "missing README", "O(n^2)", "test coverage"), and record the issue numbers (`issue_number`) of all plausible matches.
-2. **Evaluate overlap** between the candidate finding and each existing issue returned. Calculate overlap as the proportion of significant keywords (title words, technical terms, affected files/agents) shared between the candidate and the existing issue, divided by the total unique keywords across both — i.e. Jaccard similarity on the tokenized keyword sets (remove common English stop-words such as "the", "a", "is", "in", "of", "and", "to", "for", "with", "that", "it", "be"). These thresholds were chosen to match the ≥80% duplicate confidence described in the issue requirements and may be tuned as experience accumulates:
-   - If **Jaccard similarity ≥ 0.80**: treat as a **duplicate**.
-   - If **0.40 ≤ Jaccard similarity < 0.80**: treat as a **related issue** (different scope but same area).
-   - If **Jaccard similarity < 0.40**: treat as a **new issue**.
-3. **Act based on the result:**
-   - **Duplicate (sim ≥ 0.80):** Do **not** create a new issue. Instead, use `add_comment` to post your new findings as an update on the existing issue, passing the existing issue number as the `item_number` argument in the `add_comment` tool call. Also reference the existing issue number in your comment body for clarity.
-   - **Related (0.40 ≤ sim < 0.80):** Create a new issue but reference the related issue in the "Relations & Dependencies" section.
-   - **New (sim < 0.40):** Create a new issue normally using `create_issue`.
-4. **Handling ambiguous cases:** If the similarity score is borderline (within 0.05 of a threshold), or if the existing issue has a title consisting of fewer than 4 meaningful keywords and the proposed issue body covers substantially different files or components, apply the following tie-breaking rules:
-   - Prefer `add_comment` over `create_issue` when in doubt — adding a comment is reversible and avoids tracker clutter, but you **must** still explicitly pass the target issue number as `item_number` when calling `add_comment`.
-   - If the existing issue is closed, treat it as non-existent and create a new issue.
-   - If multiple existing issues match at similar scores, comment on the most recently updated one and reference the others, always using its issue number as the `item_number` in `add_comment`.
-4. **Triage & Filtered Issue Creation:** For every finding, apply the following gate before creating an issue:
-   - **Confidence Score:** Rate the finding as **High**, **Medium**, or **Low** confidence based on evidence clarity and impact certainty.
-   - **Deduplication Check:** Extract keywords from the finding (same method as step 0). Compare against the pre-run index. A finding is a **Duplicate** if it shares 3 or more keywords with an existing open issue, or if the existing issue title contains the primary subject of the finding. When a duplicate is detected, use `add_comment` to post a brief update to the existing issue (e.g., "Recurring finding in [file]: [one-sentence summary]. No new issue created.") instead of creating a new one.
-   - **Creation Threshold:** Only create a GitHub Issue if the finding is rated **High** confidence AND is not a duplicate. Exception: if the repository has zero open issues, also create **Medium** confidence findings.
-   - **Skipped Findings Log:** Collect all skipped findings (duplicates or low/medium confidence) into a summary for the session report.
-6. **Never create a new issue without first completing steps 1–4.**
-
----
-
-# Scope Constraints
-
-- **Skip generated files:** Do not audit `*.lock.yml`, `node_modules/`, or other auto-generated content
-- **Skip external dependencies:** Only audit files within this repository
-- **Priority ordering:** File Critical issues first, then Warnings, then Enhancements
-- **Issue cap:** File no more than 15 issues per run. If more are found, file the 15 highest-impact ones
-- **No duplication:** Before filing any issue, check existing open GitHub Issues and open PRs. If a finding is already tracked, skip it
-
----
-
-# Clean State Protocol
-
-If after thorough review the repository has no actionable improvements:
-1. Call the `noop` safe-output tool with the message: "Repository is in good health. No actionable improvements identified during audit."
-2. Do **not** fabricate minor issues to justify the run.
-3. Do **not** file issues for findings already covered by open issues or open PRs.
+4. **Triage & Issue Creation:** Every finding must be translated into a formal GitHub Issue. Include the repository type classification determined in Step 0 as a prefix in the issue title (e.g., `[Agent/Config Repo]`) or as the first line of the issue body (e.g., `**Repo type:** Agent/Config`). If the repository has appropriate labels already set up, also apply a matching label; otherwise rely on the title/body prefix as the repo-agnostic fallback.
 
 ---
 
