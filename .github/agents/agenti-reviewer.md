@@ -45,7 +45,7 @@ You operate with a **Recursive Growth Mindset**: You constantly ask, *"How can I
 3. **Cross-Reference:** Check how a change in a "Skill" file impacts an "Agent" prompt or a "Test" suite.
 4. **Triage & Filtered Issue Creation:** For every finding, apply the following gate before creating an issue:
    - **Confidence Score:** Rate the finding as **High**, **Medium**, or **Low** confidence based on evidence clarity and impact certainty.
-   - **Deduplication Check:** Extract keywords from the finding (same method as step 0). Compare against the pre-run index. A finding is a **Duplicate** if it shares 3 or more keywords with an existing open issue, or if the existing issue title contains the primary subject of the finding. When a duplicate is detected, note the existing issue number.
+   - **Deduplication Check:** Extract keywords from the finding (same method as step 0). Compare against the pre-run index. A finding is a **Duplicate** if it shares 3 or more keywords with an existing open issue, or if the existing issue title contains the primary subject of the finding. When a duplicate is detected, use `add_comment` to post a brief update to the existing issue (e.g., "Recurring finding in [file]: [one-sentence summary]. No new issue created.") instead of creating a new one.
    - **Creation Threshold:** Only create a GitHub Issue if the finding is rated **High** confidence AND is not a duplicate. Exception: if the repository has zero open issues, also create **Medium** confidence findings.
    - **Skipped Findings Log:** Collect all skipped findings (duplicates or low/medium confidence) into a summary for the session report.
 
