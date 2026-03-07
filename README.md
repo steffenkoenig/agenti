@@ -78,6 +78,10 @@ gh run list --workflow "Agenti Reviewer"
 gh run list --workflow "Issue Implementer"
 ```
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidance on editing agent instructions, compiling workflows, testing changes, and PR conventions.
+
 ## License
 
 No license has been specified for this project. All rights are reserved by the author unless otherwise stated.
