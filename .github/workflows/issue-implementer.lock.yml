@@ -22,10 +22,13 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v1","frontmatter_hash":"e4951c0f7839f58a87d295f183227c2b9832e788b66208fbf53ebe96e92c144b","compiler_version":"v0.53.6"}
+# gh-aw-metadata: {"schema_version":"v1","frontmatter_hash":"57a1ff918fcbc57163600adb366dac81c383818d7aefbc08950da3f598a8738a","compiler_version":"v0.53.6"}
 
 name: "Issue Implementer"
 "on":
+  schedule:
+  - cron: "43 */4 * * *"
+    # Friendly format: every 4 hours (scattered)
   workflow_dispatch:
   workflow_run:
     # zizmor: ignore[dangerous-triggers] - workflow_run trigger is secured with role and fork validation
