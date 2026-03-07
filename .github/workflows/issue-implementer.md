@@ -15,9 +15,9 @@ engine:
   agent: issue-implementer
 safe-outputs:
   create-pull-request:
-    max: 5
-  add-comment:
     max: 10
+  add-comment:
+    max: 20
 ---
 
 Run the issue implementer agent to implement open issues in this repository.
