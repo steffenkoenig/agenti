@@ -56,6 +56,7 @@ Key files to review:
 | Path | Purpose |
 |------|---------|
 | `.github/agents/*.md` | Agent instruction files (the source of truth for agent behaviour) |
+| `.github/copilot-instructions.md` | Global Copilot instructions — defines the `copilot-pr-architect` advisory agent |
 | `.github/workflows/*.md` | Workflow source files (human-readable, compiled to lock files) |
 | `.github/workflows/*.lock.yml` | Compiled lock files (generated — do **not** edit by hand) |
 | `.github/workflows/copilot-setup-steps.yml` | Environment bootstrap for GitHub Copilot Agent |
