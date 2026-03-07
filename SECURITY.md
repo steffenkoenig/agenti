@@ -73,14 +73,18 @@ Prompt injection occurs when untrusted input (e.g., issue titles, issue bodies, 
 
 ### Token Permission Model
 
-The `COPILOT_GITHUB_TOKEN` secret used in agentic workflows grants the agent access to the GitHub API. Key facts about this token:
+This repository uses a **two-token model** in its agentic workflows:
 
-- It is scoped to repository-level operations (issues, pull requests, code).
-- It does **not** have organization-level admin permissions.
-- The token is never logged or surfaced in workflow outputs.
+- `COPILOT_GITHUB_TOKEN` is provided to the Copilot/agent engine for generating plans and code, but it is **not** the primary token used to perform GitHub API operations on the repository.
+- Separate GitHub tokens (e.g., `GITHUB_MCP_SERVER_TOKEN`, `GH_AW_GITHUB_TOKEN`, `GITHUB_TOKEN`) are used by workflows to call the GitHub API and carry out repository-level actions (issues, pull requests, code changes).
+
+Key facts about these GitHub API tokens:
+
+- They are scoped to repository-level operations and do **not** have organization-level administrative permissions.
+- They are stored as GitHub Actions secrets; GitHub automatically redacts their values from logs, and workflows are designed not to print raw token values (only derived data such as API responses or status messages).
 - All agent actions are limited by the `safe-outputs` mechanism defined in each workflow.
 
-If you believe the token is over-privileged or has been exposed, please report it immediately using the private disclosure process above.
+If you believe any of these tokens are over-privileged, mis-scoped, or have been exposed, please report it immediately using the private disclosure process above.
 
 ---
 
