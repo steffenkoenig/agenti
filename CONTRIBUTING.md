@@ -17,12 +17,14 @@ Thank you for your interest in contributing to **agenti**! This guide explains h
 
 ## How the Self-Improvement Loop Works
 
-agenti runs two scheduled agentic workflows that cooperate to keep the repository healthy and evolving:
+agenti runs several scheduled agentic workflows that cooperate to keep the repository healthy and evolving:
 
 1. **Agenti Reviewer** (runs every 2 hours) — Audits the repository holistically and opens GitHub Issues for any improvements it finds.
 2. **Issue Implementer** (runs every 2 hours) — Picks up open GitHub Issues, implements them as code changes, and opens pull requests.
+3. **Security Auditor** (runs weekly) — Performs a focused security audit covering workflow permissions, pinned action SHAs, secret scopes, and agent boundary verification.
+4. **Security Audit** (runs monthly and on PRs touching `.github/**`) — Runs the security-auditor agent on pull requests that touch workflow or agent files, and on a monthly schedule.
 
-Both workflows are powered by GitHub Copilot. The agent behavior is defined in prompt files under `.github/agents/`, and the scheduling/permissions are defined in the workflow source files under `.github/workflows/*.md`. The compiled `.lock.yml` files are auto-generated and drive GitHub Actions.
+All workflows are powered by GitHub Copilot. The agent behavior is defined in prompt files under `.github/agents/`, and the scheduling/permissions are defined in the workflow source files under `.github/workflows/*.md`. The compiled `.lock.yml` files are auto-generated and drive GitHub Actions.
 
 > **Important:** Never edit `.lock.yml` files directly. Always edit the corresponding `.md` source file and recompile (see [Editing and Compiling Workflows](#editing-and-compiling-workflows)).
 
@@ -60,6 +62,7 @@ Both workflows are powered by GitHub Copilot. The agent behavior is defined in p
     security-audit.md               # Workflow source for PR + monthly security audit
     security-audit.lock.yml         # Compiled workflow — DO NOT edit manually
     copilot-setup-steps.yml         # Environment setup for the Copilot Agent runner
+    ci.yml                          # Continuous integration pipeline
   copilot-instructions.md           # Editor-level Copilot hints (no autonomous agent logic)
 CONTRIBUTING.md                     # This file
 README.md                           # Project overview and setup instructions

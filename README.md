@@ -54,7 +54,7 @@ At its core, agenti closes the loop between code review and code change: a revie
 └─────────────────────────────────────────────────────┘
 ```
 
-Both scheduled agents run every two hours, are scoped to the `main` branch, and use a concurrency lock so only one instance of each agent runs at a time. All agent outputs go through a safe-outputs firewall that caps the number of issues, pull requests, and comments an agent can create per run, preventing runaway automation.
+Both Agenti Reviewer and Issue Implementer run every two hours, are scoped to the `main` branch, and use a concurrency lock so only one instance of each runs at a time. Security Auditor runs weekly and Security Audit runs monthly (and on PRs to `.github/**`). All agent outputs go through a safe-outputs firewall that caps the number of issues, pull requests, and comments an agent can create per run, preventing runaway automation.
 
 ## Agents
 
@@ -88,6 +88,7 @@ For each finding the reviewer opens a structured GitHub Issue containing a curre
     security-audit.md           # Workflow definition (source, PR + monthly trigger)
     security-audit.lock.yml     # Compiled workflow (do not edit manually)
     copilot-setup-steps.yml     # Environment setup for Copilot Agent
+    ci.yml                      # Continuous integration pipeline
 ```
 **Safe-output limits per run:** max 10 issues · max 10 comments · max 1 noop
 
@@ -104,7 +105,7 @@ An **Autonomous Software Engineer** that fetches all open GitHub Issues, priorit
 
 ### 3. Security Auditor (`security-auditor`)
 
-A **Security Auditor** specialised in AI-native threat vectors present in gh-aw repositories. It performs a thorough, structured security review covering:
+A **Security Auditor** specialized in AI-native threat vectors present in gh-aw repositories. It performs a thorough, structured security review covering:
 
 - **Workflow permissions** — checks that permissions are minimal and do not grant unnecessary write access
 - **Pinned action SHAs** — verifies all `uses:` references are pinned to a commit SHA rather than a mutable tag
@@ -195,7 +196,7 @@ Agent behavior is defined in plain-English markdown files under `.github/agents/
 | **Security Audit** | Monthly + PR | `schedule` / `pull_request` / `workflow_dispatch` | Full security audit on `.github/**` PRs and monthly |
 | **Copilot Setup Steps** | On push / manual | `push` / `workflow_dispatch` | Provisions the gh-aw CLI environment |
 
-Both primary workflows run only on the `main` branch and use a concurrency group to prevent parallel runs of the same workflow.
+Both primary workflows run only on the `main` branch and use a concurrency group to prevent parallel runs of the same workflow. Security Auditor and Security Audit run on their own independent schedules.
 
 ## Usage
 
@@ -205,6 +206,7 @@ Both primary workflows run only on the `main` branch and use a concurrency group
 gh workflow run "Agenti Reviewer"
 gh workflow run "Issue Implementer"
 gh workflow run "Security Auditor"
+gh workflow run "Security Audit"
 ```
 
 ### Let it run automatically
@@ -213,8 +215,9 @@ gh workflow run "Security Auditor"
 gh run list --workflow "Agenti Reviewer"
 gh run list --workflow "Issue Implementer"
 gh run list --workflow "Security Auditor"
+gh run list --workflow "Security Audit"
 ```
-Once the repository secrets are set and GitHub Actions is enabled, both workflows will trigger on their two-hour cron schedules automatically. No further action is required.
+Once the repository secrets are set and GitHub Actions is enabled, the scheduled workflows will trigger on their configured cadences automatically. No further action is required.
 
 ### Customize the agents
 
