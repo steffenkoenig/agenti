@@ -10,6 +10,24 @@ disable-model-invocation: true
   Check the latest release at: https://github.com/github/gh-aw/releases/latest
   Also update `.github/workflows/copilot-setup-steps.yml` (the `uses:` tag and `version:` input).
   After updating the version, recompile all lock files with: gh aw compile
+  GH-AW VERSION PIN
+  =================
+  Pinned version : v0.53.6
+  Last updated   : 2026-03-06
+
+  This file contains 10+ URLs that reference a specific gh-aw release.
+  When a new version is released, update ALL occurrences in one shot:
+
+    sed -i 's|v0\.53\.6|NEW_VERSION|g' \
+        .github/agents/agentic-workflows.agent.md
+
+  Also update the `uses:` and `version:` fields in
+  .github/workflows/copilot-setup-steps.yml to match.
+
+  Dependabot will open a PR when gh-aw releases a new version and the
+  `uses: github/gh-aw/actions/setup-cli` reference in
+  copilot-setup-steps.yml is bumped. Use that PR as the trigger to also
+  run the sed command above and keep this file in sync.
 -->
 
 # GitHub Agentic Workflows Agent
@@ -139,6 +157,11 @@ When you interact with this agent, it will:
 - "Add a coverage gate that blocks PRs below a threshold"
 
 ## Instructions
+
+> **Version check**: The prompt URLs in this file are pinned to `v0.53.6`. Before
+> loading any prompt, verify this is still the latest release at
+> https://github.com/github/gh-aw/releases. If a newer version exists, follow
+> the update instructions in the version-pin comment at the top of this file.
 
 When a user interacts with you:
 
