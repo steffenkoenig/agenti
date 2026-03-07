@@ -4,12 +4,13 @@ A self-improving GitHub repository powered by GitHub Copilot agentic workflows. 
 
 ## How It Works
 
-Two agentic workflows run on a schedule and keep the repository healthy:
+Three agentic workflows run on a schedule and keep the repository healthy:
 
 | Workflow | Schedule | What it does |
 |---|---|---|
 | **Agenti Reviewer** | Every 2 hours (configurable) | Audits the repository holistically and opens GitHub Issues for any improvements it finds |
 | **Issue Implementer** | Every 2 hours (configurable) | Picks up open GitHub Issues, implements the changes, and opens pull requests |
+| **Security Auditor** | Weekly (configurable) | Performs a dedicated security audit covering workflow permissions, pinned action SHAs, secret scopes, prompt injection detection, and agent boundary verification |
 
 The schedule is defined in the `on.schedule` frontmatter of each workflow `.md` source file (e.g. `.github/workflows/agenti-reviewer.md`). Edit the `schedule` field and recompile to change the cadence.
 
@@ -38,12 +39,15 @@ The schedule is defined in the `on.schedule` frontmatter of each workflow `.md` 
   agents/
     agenti-reviewer.md          # Agent instructions for the reviewer
     issue-implementer.agent.md  # Agent instructions for the implementer
+    security-auditor.agent.md   # Agent instructions for the security auditor
     agentic-workflows.agent.md  # Shared gh-aw workflow conventions
   workflows/
     agenti-reviewer.md          # Workflow definition (source)
     agenti-reviewer.lock.yml    # Compiled workflow (do not edit manually)
     issue-implementer.md        # Workflow definition (source)
     issue-implementer.lock.yml  # Compiled workflow (do not edit manually)
+    security-auditor.md         # Workflow definition (source)
+    security-auditor.lock.yml   # Compiled workflow (do not edit manually)
     copilot-setup-steps.yml     # Environment setup for Copilot Agent
 ```
 
@@ -54,7 +58,7 @@ The schedule is defined in the `on.schedule` frontmatter of each workflow `.md` 
 Edit the `.md` source file for the workflow you want to change, then recompile:
 
 ```bash
-# Edit .github/workflows/agenti-reviewer.md or issue-implementer.md, then:
+# Edit .github/workflows/agenti-reviewer.md, issue-implementer.md, or security-auditor.md, then:
 gh aw compile
 ```
 
@@ -69,6 +73,7 @@ To adjust agent behavior (prompts, constraints, output limits), edit the corresp
 ```bash
 gh workflow run "Agenti Reviewer"
 gh workflow run "Issue Implementer"
+gh workflow run "Security Auditor"
 ```
 
 ### View recent runs
@@ -76,6 +81,7 @@ gh workflow run "Issue Implementer"
 ```bash
 gh run list --workflow "Agenti Reviewer"
 gh run list --workflow "Issue Implementer"
+gh run list --workflow "Security Auditor"
 ```
 
 ## License
