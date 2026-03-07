@@ -1,19 +1,37 @@
 # agenti
 
-> A self-managing GitHub repository powered by autonomous AI agent workflows.
+A self-improving GitHub repository powered by GitHub Copilot agentic workflows. **agenti** automatically audits itself for improvements, files issues, and implements those issues — all without human intervention.
 
-**agenti** uses [GitHub Agentic Workflows (gh-aw)](https://github.com/github/gh-aw) to continuously review its own code, file improvement issues, and implement fixes — all without manual intervention.
+## How It Works
 
-## What it does
+Two agentic workflows run on a schedule and keep the repository healthy:
 
-| Agent | Trigger | Action |
-|-------|---------|--------|
-| `agenti-reviewer` | Every 2 hours | Reviews the repository, identifies improvements, and files GitHub Issues |
-| `issue-implementer` | Every 2 hours | Picks the top 5 open issues by priority, implements them, and opens pull requests |
+| Workflow | Schedule | What it does |
+|---|---|---|
+| **Agenti Reviewer** | Every 2 hours (configurable) | Audits the repository holistically and opens GitHub Issues for any improvements it finds |
+| **Issue Implementer** | Every 2 hours (configurable) | Picks up open GitHub Issues, implements the changes, and opens pull requests |
 
-The repository is essentially **self-improving**: the reviewer finds problems, the implementer fixes them, and humans can review and merge the resulting PRs.
+The schedule is defined in the `on.schedule` frontmatter of each workflow `.md` source file (e.g. `.github/workflows/agenti-reviewer.md`). Edit the `schedule` field and recompile to change the cadence.
 
-## Architecture
+## Prerequisites
+
+- A GitHub repository with **GitHub Copilot** enabled. Agentic workflows require a plan that includes GitHub Copilot (e.g. Copilot Business or Copilot Enterprise). See [GitHub's Copilot plans](https://docs.github.com/en/copilot/about-github-copilot/subscription-plans-for-github-copilot) for details.
+- The [`gh-aw`](https://github.github.com/gh-aw/introduction/overview/) CLI extension installed locally if you want to edit or recompile workflows:
+  ```bash
+  gh extension install github/gh-aw
+  ```
+
+## Setup
+
+1. **Fork or clone this repository** into your GitHub account or organization.
+
+2. **Enable GitHub Copilot** for the repository (Settings → Copilot).
+
+3. **Grant the required permissions** to the `GITHUB_TOKEN` used by the workflows. The compiled lock files already declare the minimum permissions needed (`contents`, `issues`, `pull-requests`).
+
+4. The workflows run automatically on their schedule. You can also trigger them manually from the **Actions** tab using the `workflow_dispatch` event.
+
+## Repository Structure
 
 ```
 .github/
