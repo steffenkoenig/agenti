@@ -65,9 +65,9 @@ Prompt injection occurs when untrusted input (e.g., issue titles, issue bodies, 
 **Risk**: A malicious actor could craft a GitHub Issue with content designed to override agent instructions — for example, instructing the agent to exfiltrate secrets, modify unrelated files, or bypass safety constraints.
 
 **Mitigations in place**:
-- Agent instructions are defined in structured `.agent.md` files with explicit safe-output constraints.
-- The `safe-outputs` system limits permitted actions (e.g., `create_pull_request` max 5, `noop` max 1).
-- Agents do not have direct `git push` access; all changes go through reviewed pull requests.
+- Agent instructions are defined in structured files under `.github/agents/` (using either a `.md` or `.agent.md` extension, e.g., `agenti-reviewer.md`, `issue-implementer.agent.md`) with explicit safe-output constraints declared per workflow.
+- The `safe-outputs` system limits permitted actions on a per-workflow basis — for example, the `agenti-reviewer` workflow may only create issues and add comments, while `issue-implementer` may only create pull requests and add comments. Neither workflow can perform arbitrary API calls beyond these defined outputs.
+- Agents do not have direct `git push` access; all code changes go through pull requests that can be reviewed before merging.
 
 **Please report** any issue or pull request content that you believe could be used as a prompt injection payload.
 
