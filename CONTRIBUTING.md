@@ -46,13 +46,21 @@ Both workflows are powered by GitHub Copilot. The agent behavior is defined in p
   agents/
     agenti-reviewer.md              # Prompt/instructions for the Reviewer agent
     issue-implementer.agent.md      # Prompt/instructions for the Issue Implementer agent
+    security-auditor.agent.md       # Prompt/instructions for the Security Auditor agent
+    security-sentinel.md            # Prompt/instructions for the Security Sentinel agent
+    doc-guardian.md                 # Prompt/instructions for the Doc Guardian agent
     agentic-workflows.agent.md      # Shared gh-aw conventions used by all agents
   workflows/
     agenti-reviewer.md              # Workflow source (edit this, not the .lock.yml)
     agenti-reviewer.lock.yml        # Compiled workflow — DO NOT edit manually
     issue-implementer.md            # Workflow source (edit this, not the .lock.yml)
     issue-implementer.lock.yml      # Compiled workflow — DO NOT edit manually
+    security-auditor.md             # Workflow source (edit this, not the .lock.yml)
+    security-auditor.lock.yml       # Compiled workflow — DO NOT edit manually
+    security-audit.md               # Workflow source for PR + monthly security audit
+    security-audit.lock.yml         # Compiled workflow — DO NOT edit manually
     copilot-setup-steps.yml         # Environment setup for the Copilot Agent runner
+  copilot-instructions.md           # Editor-level Copilot hints (no autonomous agent logic)
 CONTRIBUTING.md                     # This file
 README.md                           # Project overview and setup instructions
 ```
@@ -68,6 +76,9 @@ Agent instruction files live in `.github/agents/`. Each file is a Markdown docum
 1. Open the relevant agent file:
    - **Reviewer logic** → `.github/agents/agenti-reviewer.md`
    - **Implementer logic** → `.github/agents/issue-implementer.agent.md`
+   - **Security Auditor logic** → `.github/agents/security-auditor.agent.md`
+   - **Security Sentinel logic** → `.github/agents/security-sentinel.md`
+   - **Doc Guardian logic** → `.github/agents/doc-guardian.md`
    - **Shared gh-aw conventions** → `.github/agents/agentic-workflows.agent.md`
 
 2. Edit the instructions carefully. Keep prompts unambiguous and atomic — each skill or constraint should have a single, clear purpose to minimize hallucination risk.
@@ -87,6 +98,8 @@ Workflow definitions live in `.github/workflows/*.md`. These source files contro
 1. Edit the relevant `.md` source file:
    - **Reviewer schedule/config** → `.github/workflows/agenti-reviewer.md`
    - **Implementer schedule/config** → `.github/workflows/issue-implementer.md`
+   - **Security Auditor schedule/config** → `.github/workflows/security-auditor.md`
+   - **Security Audit (PR + monthly) config** → `.github/workflows/security-audit.md`
 
 2. Recompile the workflow to regenerate the `.lock.yml`:
    ```bash
@@ -160,5 +173,6 @@ Check the run logs to confirm the agent behaved as expected before merging your 
 - **Commit related changes together** — always commit the `.md` source file and its compiled `.lock.yml` as a single commit when modifying workflows.
 - **Open a pull request** against `main`. Provide a clear description of what changed and why.
 - **Avoid editing `.lock.yml` files directly.** If a PR contains manual edits to a `.lock.yml`, it will be flagged for review.
-- The **Issue Implementer** agent may open PRs automatically. These follow the same conventions and should be reviewed like any other PR before merging.
+- **All pull requests require human review before merging.** A maintainer must review and approve the PR. No automated agent merges pull requests — agents open PRs, but the merge decision is always made by a human.
+- The **Issue Implementer** agent may open PRs automatically. These follow the same conventions as manually-opened PRs.
 - If the self-improvement loop opens an issue you disagree with, close it with a comment explaining the reasoning so the agent can learn from the context.
