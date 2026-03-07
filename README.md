@@ -5,6 +5,14 @@
 
 **agenti** is an AI-powered, self-evolving repository management system built on [GitHub Agentic Workflows (gh-aw)](https://github.com/github/gh-aw). It deploys a team of autonomous AI agents that continuously audit your codebase, open GitHub Issues for findings, implement those issues as pull requests, and even improve the agents themselves — all on a recurring schedule with no human intervention required.
 
+Three agentic workflows run on a schedule and keep the repository healthy:
+
+| Workflow | Schedule | What it does |
+|---|---|---|
+| **Agenti Reviewer** | Every 2 hours (configurable) | Audits the repository holistically and opens GitHub Issues for any improvements it finds |
+| **Issue Implementer** | Every 2 hours (configurable) | Picks up open GitHub Issues, implements the changes, and opens pull requests |
+| **Security Auditor** | Weekly (configurable) | Performs a dedicated security audit covering workflow permissions, pinned action SHAs, secret scopes, prompt injection detection, and agent boundary verification |
+
 At its core, agenti closes the loop between code review and code change: a reviewer agent scans the repository and files structured issues; an implementer agent picks those issues up and submits pull requests; and a workflow-management agent keeps all the underlying automation up to date. The result is a living repository that reflexively repairs and improves itself around the clock.
 
 ## Table of Contents
@@ -60,6 +68,22 @@ A **Senior Architect / Repository Sentinel** that performs holistic, recursive a
 
 For each finding the reviewer opens a structured GitHub Issue containing a current-state/desired-state description, impact rating (Critical / Warning / Enhancement), a step-by-step proposed solution, and a checklist of acceptance criteria.
 
+```
+.github/
+  agents/
+    agenti-reviewer.md          # Agent instructions for the reviewer
+    issue-implementer.agent.md  # Agent instructions for the implementer
+    security-auditor.agent.md   # Agent instructions for the security auditor
+    agentic-workflows.agent.md  # Shared gh-aw workflow conventions
+  workflows/
+    agenti-reviewer.md          # Workflow definition (source)
+    agenti-reviewer.lock.yml    # Compiled workflow (do not edit manually)
+    issue-implementer.md        # Workflow definition (source)
+    issue-implementer.lock.yml  # Compiled workflow (do not edit manually)
+    security-auditor.md         # Workflow definition (source)
+    security-auditor.lock.yml   # Compiled workflow (do not edit manually)
+    copilot-setup-steps.yml     # Environment setup for Copilot Agent
+```
 **Safe-output limits per run:** max 10 issues · max 10 comments · max 1 noop
 
 ### 2. Issue Implementer (`issue-implementer`)
@@ -104,11 +128,8 @@ cd agenti
 ### 2. Install the GitHub CLI and gh-aw extension
 
 ```bash
-# Install GitHub CLI (see https://cli.github.com/ for platform-specific instructions)
-gh auth login
-
-# Install the gh-aw extension
-gh extension install github/gh-aw
+# Edit .github/workflows/agenti-reviewer.md, issue-implementer.md, or security-auditor.md, then:
+gh aw compile
 ```
 
 ### 3. Configure repository secrets
@@ -142,15 +163,18 @@ Both primary workflows run only on the `main` branch and use a concurrency group
 ### Trigger manually
 
 ```bash
-# Run the reviewer agent once
-gh workflow run agenti-reviewer.lock.yml
-
-# Run the issue implementer once
-gh workflow run issue-implementer.lock.yml
+gh workflow run "Agenti Reviewer"
+gh workflow run "Issue Implementer"
+gh workflow run "Security Auditor"
 ```
 
 ### Let it run automatically
 
+```bash
+gh run list --workflow "Agenti Reviewer"
+gh run list --workflow "Issue Implementer"
+gh run list --workflow "Security Auditor"
+```
 Once the repository secrets are set and GitHub Actions is enabled, both workflows will trigger on their two-hour cron schedules automatically. No further action is required.
 
 ### Customize the agents
