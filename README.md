@@ -16,6 +16,7 @@ At its core, agenti closes the loop between code review and code change: a revie
 - [Workflows](#workflows)
 - [Usage](#usage)
 - [Contributing](#contributing)
+- [License](#license)
 
 ## Architecture
 
@@ -168,3 +169,8 @@ After editing an agent file, simply commit your changes. Recompilation is only r
 5. **Open a pull request** — reference the related issue in the PR description.
 
 > **Note:** The Issue Implementer agent runs every two hours and may implement open issues automatically.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
