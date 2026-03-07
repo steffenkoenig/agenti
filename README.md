@@ -26,6 +26,7 @@ At its core, agenti closes the loop between code review and code change: a revie
 - [Workflows](#workflows)
 - [Usage](#usage)
 - [Contributing](#contributing)
+- [License](#license)
 
 ## Architecture
 
