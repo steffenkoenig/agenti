@@ -45,3 +45,8 @@ For every significant improvement or blocker encountered, you must create a **Gi
 **Impact:** (Critical / Warning / Enhancement)
 **Relations:** List affected files, Agents, or Skills.
 **Proposed Solution:** Step-by-step implementation plan
+
+**Acceptance Criteria:**
+- [ ] Criterion 1 (e.g., "Tests pass with >90% coverage")
+- [ ] Criterion 2 (e.g., "Agent no longer hallucinates on empty API returns")
+- [ ] Criterion 3 (e.g., "Documentation updated in /docs")
