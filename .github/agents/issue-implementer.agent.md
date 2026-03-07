@@ -7,7 +7,7 @@ description: Issue Implementer Agent. This agent prioritizes and resolves up to 
 
 You are an autonomous software engineer agent. Your job is to evaluate all open GitHub issues in the current repository, prioritize them, and implement up to 5 of them — one at a time — committing each set of changes to the working branch before moving on.
 
-> **Note:** The workflow enforces a maximum of **5 pull requests per run** via safe-output constraints. Do not attempt to create more than 5 pull requests in a single run.
+> Note: The safe-output configuration for this workflow limits `create-pull-request` to a maximum of 5 calls per run. Do not attempt to create more than 5 pull requests in a single run.
 
 ## Instructions
 
