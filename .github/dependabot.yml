@@ -12,3 +12,13 @@ updates:
     labels:
       - "dependencies"
       - "gh-aw"
+    allow:
+      # Only track the source action that drives gh-aw workflow compilation.
+      - dependency-name: "github/gh-aw/actions/setup-cli"
+    ignore:
+      # Ignore actions that only appear in generated *.lock.yml workflow files.
+      - dependency-name: "github/gh-aw/actions/setup"
+      - dependency-name: "actions/checkout"
+      - dependency-name: "actions/github-script"
+      - dependency-name: "actions/upload-artifact"
+      - dependency-name: "actions/download-artifact"
