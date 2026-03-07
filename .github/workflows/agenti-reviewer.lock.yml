@@ -22,13 +22,13 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v1","frontmatter_hash":"c750eadbbc84b078568d0f0d7cebcef9b148e2ea0aa3e6406bdef509a5b705d2","compiler_version":"v0.53.6"}
+# gh-aw-metadata: {"schema_version":"v1","frontmatter_hash":"49fad07d25a21a500c96a938429401c05449bbe6c54ea893d93c1bd7e2de99e7","compiler_version":"v0.53.6"}
 
-name: "Agenti Reviewer"
+name: "Repository Sentinel"
 "on":
   schedule:
-  - cron: "35 */2 * * *"
-    # Friendly format: every 2 hours (scattered)
+  - cron: "35 */168 * * *"
+    # Friendly format: every 168h (scattered)
   workflow_dispatch:
 
 permissions: {}

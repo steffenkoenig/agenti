@@ -16,8 +16,6 @@ engine:
   agent: issue-implementer
 safe-outputs:
   create-pull-request:
-    max: 5
-  add-comment:
     max: 10
   noop:
     max: 1
