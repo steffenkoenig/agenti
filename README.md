@@ -124,6 +124,14 @@ A **Dispatcher / Workflow Engineer** helper agent intended for manual, on-demand
 - Upgrading the gh-aw extension version across all workflows
 - Generating reports and shared reusable workflow components
 
+### 5. PR Architect (`copilot-pr-architect`)
+
+> **Advisory only:** This agent reviews pull requests and reports findings. It does **not** autonomously merge or delete branches — those actions require human approval.
+
+A **Code Review and Issue Reporting Assistant** that audits open pull requests for logic efficiency, design-pattern violations, documentation gaps, and agent/skill prompt quality. For each finding it posts a structured review comment or opens a GitHub Issue. It is invoked automatically by GitHub Copilot when reviewing PRs, and is not a scheduled workflow.
+
+**Capabilities:** deep code review · CI/CD failure analysis · conflict identification · issue reporting
+
 ## Prerequisites
 
 | Requirement | Version | Purpose |
