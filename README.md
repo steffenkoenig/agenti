@@ -27,9 +27,29 @@ The schedule is defined in the `on.schedule` frontmatter of each workflow `.md` 
 
 2. **Enable GitHub Copilot** for the repository (Settings → Copilot).
 
-3. **Grant the required permissions** to the `GITHUB_TOKEN` used by the workflows. The compiled lock files already declare the minimum permissions needed (`contents`, `issues`, `pull-requests`).
+3. **Add the `COPILOT_GITHUB_TOKEN` repository secret** — go to **Settings → Secrets and variables → Actions → New repository secret** and add a token with GitHub Copilot access. Both workflows validate this secret at startup and will fail without it.
 
-4. The workflows run automatically on their schedule. You can also trigger them manually from the **Actions** tab using the `workflow_dispatch` event.
+4. **Grant the required permissions** to the `GITHUB_TOKEN` used by the workflows. The compiled lock files already declare the minimum permissions needed (`contents`, `issues`, `pull-requests`).
+
+5. The workflows run automatically on their schedule. You can also trigger them manually from the **Actions** tab using the `workflow_dispatch` event.
+
+### Local development
+
+```bash
+# Install gh-aw CLI
+gh extension install github/gh-aw
+
+# Edit a workflow source file
+vim .github/workflows/issue-implementer.md
+
+# Compile to lock file after editing
+gh aw compile issue-implementer
+
+# Run a workflow locally (dry run)
+gh aw run issue-implementer --dry-run
+```
+
+> ⚠️ Never edit `.lock.yml` files directly — they are generated and will be overwritten on the next compile.
 
 ## Repository Structure
 
@@ -51,39 +71,6 @@ The schedule is defined in the `on.schedule` frontmatter of each workflow `.md` 
 - **Prompt injection defense**: Issue and PR bodies are treated as untrusted data — agents never follow instructions embedded in repository content.
 - **Minimal permissions**: Each workflow declares only the GitHub token permissions it needs.
 - **Idempotency**: Agents check for existing open PRs before implementing an issue to avoid duplicate work.
-
-## Getting started
-
-### Prerequisites
-
-- A GitHub repository
-- [GitHub Copilot](https://github.com/features/copilot) access (for the Copilot engine)
-- [gh-aw CLI](https://github.com/github/gh-aw) (for local development and compiling workflows)
-
-### Setup
-
-1. **Clone or fork** this repository
-2. **Enable GitHub Actions** in your repository settings
-3. **Configure Copilot agent permissions** — ensure the workflow has access to create PRs and issues
-4. The agents will start running on their configured schedules automatically
-
-### Local development
-
-```bash
-# Install gh-aw CLI
-gh extension install github/gh-aw
-
-# Edit a workflow source file
-vim .github/workflows/issue-implementer.md
-
-# Compile to lock file after editing
-gh aw compile issue-implementer
-
-# Run a workflow locally (dry run)
-gh aw run issue-implementer --dry-run
-```
-
-> ⚠️ Never edit `.lock.yml` files directly — they are generated and will be overwritten on the next compile.
 
 ## Contributing
 
