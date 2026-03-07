@@ -64,18 +64,18 @@ For each finding the reviewer opens a structured GitHub Issue containing a curre
 
 ### 2. Issue Implementer (`issue-implementer`)
 
-An **Autonomous Software Engineer** that fetches all open GitHub Issues, prioritizes them using explicit labels, community reactions, comments, and age, then implements up to 10 per run. For each selected issue it:
+An **Autonomous Software Engineer** that fetches all open GitHub Issues, prioritizes them using explicit labels, community reactions, comments, and age, then implements up to 5 issues per run (subject to safe-output limits). For each run it:
 
-1. Produces a detailed task list (understanding, affected files, implementation steps, tests, docs, acceptance criteria)
+1. Produces a detailed task list for the selected issues (understanding, affected files, implementation steps, tests, docs, acceptance criteria)
 2. Makes the required code changes
 3. Adds or updates tests and documentation
-4. Opens a pull request referencing the issue
+4. Opens one or more pull requests referencing the implemented issues (possibly grouping several issues per pull request to honor safe-output limits)
 
 **Safe-output limits per run:** max 5 pull requests · max 10 comments · max 1 noop
 
 ### 3. Agentic Workflows Agent (`agentic-workflows`)
 
-A **Dispatcher / Workflow Engineer** that manages the gh-aw workflow definitions themselves. It routes requests to specialized sub-prompts for:
+A **Dispatcher / Workflow Engineer** helper agent intended for manual, on-demand use (there is no scheduled workflow that runs it automatically). It routes requests to specialized sub-prompts for:
 
 - Creating and updating workflow definitions (`.github/workflows/*.md`)
 - Compiling `.md` sources to `.lock.yml` files via `gh aw compile`
@@ -125,12 +125,7 @@ Ensure GitHub Actions is enabled for your repository. The compiled lock files (`
 
 ### 5. (Optional) Edit agent prompts
 
-The agent behaviour is defined in plain-English markdown files under `.github/agents/`. Edit these files to customise how the agents operate, then recompile the lock files:
-
-```bash
-gh aw compile .github/workflows/agenti-reviewer.md
-gh aw compile .github/workflows/issue-implementer.md
-```
+Agent behavior is defined in plain-English markdown files under `.github/agents/`. Edit these files to customize how the agents operate, then commit your changes. No recompilation is needed for agent prompt-only edits — recompilation is only required when you change a workflow definition file (`.github/workflows/*.md`).
 
 ## Workflows
 
@@ -158,15 +153,11 @@ gh workflow run issue-implementer.lock.yml
 
 Once the repository secrets are set and GitHub Actions is enabled, both workflows will trigger on their two-hour cron schedules automatically. No further action is required.
 
-### Customise the agents
+### Customize the agents
 
-Open any file in `.github/agents/` in your editor. GitHub Copilot is enabled for markdown files in this repository, so you can use Copilot to help you refine agent instructions. After editing, recompile the affected workflow:
+Open any file in `.github/agents/` in your editor. GitHub Copilot is enabled for markdown files in this repository, so you can use Copilot to help you refine agent instructions.
 
-```bash
-gh aw compile .github/workflows/<workflow-name>.md
-```
-
-Commit both the `.md` source and the regenerated `.lock.yml` file.
+After editing an agent file, simply commit your changes. Recompilation is only required if you also modify a workflow definition in `.github/workflows/*.md` (see the [Contributing](#contributing) section).
 
 ## Contributing
 
@@ -176,4 +167,4 @@ Commit both the `.md` source and the regenerated `.lock.yml` file.
 4. **Compile workflows** — if you edit any `.github/workflows/*.md` file, run `gh aw compile` and commit the resulting `.lock.yml`.
 5. **Open a pull request** — reference the related issue in the PR description.
 
-> **Note:** The Issue Implementer agent runs every two hours and may implement open issues automatically. If you are actively working on an issue, add a comment so the agent skips it.
+> **Note:** The Issue Implementer agent runs every two hours and may implement open issues automatically.
