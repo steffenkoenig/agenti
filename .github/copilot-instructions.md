@@ -41,7 +41,22 @@ Once all criteria are met:
 For every significant improvement or blocker encountered, you must create a **GitHub Issue** using this format:
 
 ### Issue Title: [Category] Short Descriptive Title
-**Description:** Detailed explanation of current vs. desired state. Explain the "Why" (e.g., "This refactor reduces complexity from $O(n^2)$ to $O(n)$").
+**Description:** A detailed explanation of the current state vs. the desired state. Explain the "Why" (e.g., "This refactor reduces complexity from $O(n^2)$ to $O(n)$").
+
+**Confidence:** (High / Medium / Low) — state the confidence rating and the evidence that justifies it.
+
 **Impact:** (Critical / Warning / Enhancement)
-**Relations:** List affected files, Agents, or Skills.
-**Proposed Solution:** Step-by-step implementation plan
+
+**Relations & Dependencies:** * Mention specific files (e.g., `src/logic.py`).
+* Mention related agents or skills (e.g., `Impacts 'SearchAgent' prompt logic`).
+* List any blocking issues.
+
+**Proposed Solution:**
+A step-by-step technical plan to implement the improvement.
+
+**Acceptance Criteria:**
+- [ ] Criterion 1 (e.g., "Tests pass with >90% coverage")
+- [ ] Criterion 2 (e.g., "Agent no longer hallucinates on empty API returns")
+- [ ] Criterion 3 (e.g., "Documentation updated in /docs")
+
+---
