@@ -105,7 +105,7 @@ Workflow definitions live in `.github/workflows/*.md`. These source files contro
 
 > **Note:** `gh aw` schedule only supports `every N minutes/hours/days` format. Weekly or monthly cadences are not valid — use `every 30 days` as the closest approximation.
 
-> **Note:** `gh aw` strict mode forbids `issues: write` in the `permissions` block. Use the `safe-outputs.create-issue` mechanism instead for write operations.
+> **Note:** In `gh aw` strict mode, keep the top-level `permissions` in the `.md` source as minimal as possible (typically read-only, e.g. `contents: read`). When you need to create or update issues, use `safe-outputs` (for example `safe-outputs.create-issue`); `gh aw` will generate helper jobs in the compiled `.lock.yml` with the necessary elevated permissions such as `issues: write` for those actions.
 
 ---
 
@@ -118,9 +118,9 @@ Because the workflows run inside GitHub Actions with Copilot, there is no fully 
    yamllint .github/workflows/
    ```
 
-2. **Agent frontmatter validation** — If a CI check for agent frontmatter exists, run it:
+2. **Agent/workflow validation** — Use `gh aw compile` to validate your changes. If compilation succeeds without errors, the workflow definition is syntactically valid:
    ```bash
-   python .github/scripts/check-frontmatter.py
+   gh aw compile
    ```
 
 3. **Dry-run review of agent prompts** — Read through the agent instruction file and verify that instructions are clear, unambiguous, and do not conflict. Pay particular attention to the `safe-outputs` keys the agent is allowed to call.
