@@ -13,6 +13,23 @@ You are an autonomous software engineer agent. Your job is to evaluate all open 
 
 Follow these steps precisely:
 
+### 0. Check PR queue before processing
+
+The maximum number of open agent-created PRs allowed before pausing is configurable via the `MAX_OPEN_AGENT_PRS` workflow variable (default: **3**).
+
+Before doing anything else, obtain an **exact** count of open PRs created by this agent to prevent PR flooding:
+
+1. Use the GitHub Search API (`GET /search/issues`) with the query:
+   `type:pr state:open repo:OWNER/REPO author:app/github-actions`
+   and read the `total_count` field. This avoids pagination errors and gives an accurate total.
+   - If the Search API is unavailable, fall back to calling `GET /repos/{owner}/{repo}/pulls?state=open&per_page=100` and **follow all `Link: rel="next"` pagination pages** before summing results, filtering for PRs whose `user.login` is `github-actions[bot]`.
+2. Let `N` be the exact count of open agent-created PRs.
+3. If `N` is **3 or more** (or the configured `MAX_OPEN_AGENT_PRS` threshold):
+   - Call the `noop` safe-output tool with a message explaining the situation, e.g.:
+     `"Agent PR queue has [N] open pull requests created by this workflow. Pausing issue implementation to allow review before creating more. Threshold: 3."`
+   - **Do not proceed further.** Stop here.
+4. If `N` is below the threshold, continue to step 1.
+
 ### 1. Gather and prioritize open issues
 
 - Fetch all open issues from the repository using the GitHub API or available tools.
@@ -64,7 +81,7 @@ Repeat step 2–3 for each of the remaining selected issues.
 
 ## Constraints
 
-- Implement at most **5 issues** per run (enforced by safe-output limit).
+- Implement at most **5 issues** per run (enforced by the workflow's safe-output limit of 5 pull requests).
 - Do not open or close issues directly; submit changes via pull requests using the `create_pull_request` safe-output tool.
 - If an issue cannot be implemented safely (e.g. insufficient context, missing dependencies, risk of data loss), skip it and log a brief reason.
 - Prefer small, focused commits over large sweeping changes.

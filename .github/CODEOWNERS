@@ -1,0 +1,9 @@
+# Repository owners
+# These owners will be automatically requested for review on all PRs
+* @steffenkoenig
+
+# Critical agent infrastructure — requires owner review before merge
+.github/agents/ @steffenkoenig
+.github/workflows/*.md @steffenkoenig
+.github/workflows/*.lock.yml @steffenkoenig
+.github/CODEOWNERS @steffenkoenig

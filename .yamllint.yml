@@ -1,0 +1,31 @@
+# yamllint configuration for this repository.
+#
+# Extends the built-in "relaxed" profile and relaxes rules that would
+# otherwise flag the auto-generated *.lock.yml files (long banner lines,
+# trailing spaces in ASCII art, comment style, etc.).
+
+extends: relaxed
+
+rules:
+  # Lock files contain long banner-art comment lines and metadata lines.
+  line-length: disable
+
+  # Lock files use bare booleans such as `cancel-in-progress: false`.
+  # The relaxed profile already disables this; keep it explicit.
+  truthy: disable
+
+  # Banner-art comments in lock files do not follow strict comment style.
+  comments: disable
+  comments-indentation: disable
+
+  # Lock files do not use an explicit document-start marker (---).
+  document-start: disable
+
+  # Banner-art lines in lock files contain trailing spaces.
+  trailing-spaces: disable
+
+  # Auto-generated lock files use non-standard indentation in some blocks.
+  indentation: disable
+
+  # Auto-generated lock files have occasional extra blank lines.
+  empty-lines: disable
