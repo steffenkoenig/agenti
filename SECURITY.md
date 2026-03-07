@@ -2,74 +2,56 @@
 
 ## Supported Versions
 
-This repository contains GitHub Agentic Workflow (gh-aw) configurations and agent instructions. The following components are actively maintained:
-
-| Component | Maintained |
-| --- | --- |
-| `.github/workflows/*.md` (workflow sources) | ✅ Yes |
-| `.github/workflows/*.lock.yml` (compiled) | ✅ Yes |
-| `.github/agents/*.agent.md` | ✅ Yes |
+| Version | Supported          |
+| ------- | ------------------ |
+| main    | :white_check_mark: |
 
 ## Reporting a Vulnerability
 
-**Please do not report security vulnerabilities through public GitHub Issues.**
+**Please do not report security vulnerabilities through public GitHub issues.**
 
-To report a security vulnerability, use [GitHub's private vulnerability reporting](https://github.com/steffenkoenig/agenti/security/advisories/new). You will receive an acknowledgement within **72 hours** and a resolution update within **7 days**.
+To report a security vulnerability, please use [GitHub's private vulnerability reporting](https://github.com/steffenkoenig/agenti/security/advisories/new).
 
-Please include:
+Alternatively, you can email the repository owner directly. You can find contact information in the [GitHub profile](https://github.com/steffenkoenig).
 
-- A description of the vulnerability and its potential impact.
-- The affected file(s) and line numbers where applicable.
-- Steps to reproduce or a proof-of-concept.
-- Any suggested remediation.
+### What to include
 
-## Security Model
+When reporting a vulnerability, please include:
 
-### Agent Workflow Firewall (AWF)
+- A description of the vulnerability and its potential impact
+- Steps to reproduce the issue
+- Any relevant logs, screenshots, or proof-of-concept code
+- Your suggested fix (if any)
 
-All agentic workflows execute inside the [Agent Workflow Firewall](https://github.github.com/gh-aw/reference/firewall/) sandbox. Outbound network traffic is restricted to an explicit domain allowlist. Review `GH_AW_INFO_ALLOWED_DOMAINS` in each `.lock.yml` file to understand the permitted domains for a given workflow.
+### Response timeline
 
-### Principle of Least Privilege
+- **Acknowledgement**: Within 48 hours of receiving your report
+- **Initial assessment**: Within 5 business days
+- **Resolution**: Depends on severity; critical issues are prioritized
 
-Every workflow job requests only the GitHub token permissions it requires. The top-level `permissions:` block is set to `{}` (deny-all default) and individual jobs declare only the scopes they need. Review the `permissions:` blocks in each `.lock.yml` to verify.
+## Security Considerations for This Repository
 
-### Action Pinning
+This repository contains autonomous AI agent configurations that:
 
-Where possible, third-party `uses:` references in lock files are pinned to a full commit SHA to prevent supply-chain attacks via tag re-pointing. Some first-party gh-aw actions (for example `github/gh-aw/actions/setup`) intentionally use maintained version tags (such as `v0.53.6`). If you observe an unexpected mutable tag or branch reference in a non-gh-aw action, please report it.
+- **Create pull requests** automatically on a schedule
+- **Read repository contents** and GitHub issue data
+- **Execute agent workflows** via GitHub Actions
 
-### Safe Outputs
+### Threat model
 
-AI agents communicate with the GitHub API exclusively through the `safe-outputs` mechanism, which enforces per-run rate limits (e.g., at most 5 pull requests or 10 issues per workflow run). Agents cannot directly call GitHub write APIs.
+Key security concerns for this repo include:
 
-### Prompt Injection
+- **Prompt injection**: Malicious content in issues/PRs could influence agent behavior. All issue and PR bodies are treated as untrusted data.
+- **Token permissions**: Agents use the minimum required GitHub token permissions (see workflow frontmatter `permissions:` blocks).
+- **Safe-output limits**: Workflow configurations cap the number of GitHub API actions per run to prevent runaway automation.
+- **Secrets exposure**: No secrets should ever be committed to agent instruction files or workflow definitions.
 
-Agent instructions are reviewed by the [`security-auditor`](.github/agents/security-auditor.agent.md) specialist agent for prompt injection vulnerabilities, ensuring that user-supplied content (issue bodies, PR titles, comments) cannot hijack agent behaviour.
+### Responsible disclosure
 
-## Automated Security Auditing
+We are committed to working with security researchers to investigate and address reported vulnerabilities. We request that you:
 
-A dedicated `Security Audit` workflow (`.github/workflows/security-audit.md`) runs automatically:
+1. Give us reasonable time to investigate and mitigate the issue before any public disclosure.
+2. Avoid accessing or modifying data that does not belong to you.
+3. Act in good faith and avoid disrupting the repository's normal operations.
 
-- On every pull request that modifies files under `.github/`.
-- On a monthly schedule.
-- On demand via `workflow_dispatch`.
-
-The workflow uses the [`security-auditor`](.github/agents/security-auditor.agent.md) agent to check all six security domains:
-
-1. Prompt Injection Detection
-2. Permission Audit
-3. Secret Hygiene
-4. Action Pin Audit
-5. Network Allowlist Review
-6. Output Injection Audit
-
-Findings are reported as GitHub Issues with severity labels.
-
-## Known Security Considerations
-
-### Action SHA Pinning
-
-Where possible, third-party `uses:` references in lock files are pinned to full commit SHAs by the `gh aw compile` toolchain. Some first-party gh-aw actions (for example `github/gh-aw/actions/setup`) intentionally use maintained version tags (such as `v0.53.6`). Never edit lock files manually — always recompile from the `.md` source.
-
-### COPILOT_GITHUB_TOKEN Scope
-
-The `COPILOT_GITHUB_TOKEN` secret used by agentic workflows should be scoped to the minimum permissions required. Periodically audit the token's organisation-level permissions via the GitHub token settings page.
+We will not take legal action against researchers who responsibly disclose vulnerabilities following these guidelines.
