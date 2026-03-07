@@ -12,7 +12,7 @@ disable-model-invocation: true
   This file contains 10+ URLs that reference a specific gh-aw release.
   When a new version is released, update ALL occurrences in one shot:
 
-    sed -i 's|/gh-aw/blob/v0\.53\.6/|/gh-aw/blob/NEW_VERSION/|g' \
+    sed -i 's|v0\.53\.6|NEW_VERSION|g' \
         .github/agents/agentic-workflows.agent.md
 
   Also update the `uses:` and `version:` fields in

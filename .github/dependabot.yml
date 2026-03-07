@@ -8,3 +8,9 @@ updates:
       prefix: "chore"
     labels:
       - "dependencies"
+    ignore:
+      # Ignore dependencies that are only present in auto-generated .lock.yml workflow files.
+      # These should be updated by recompiling with `gh aw compile`, not by Dependabot.
+      - dependency-name: "github/gh-aw/actions/setup"
+        versions:
+          - "*"
