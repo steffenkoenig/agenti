@@ -15,14 +15,22 @@ The `.lock.yml` files under `.github/workflows/` are **auto-generated** by `gh a
 
 ## Handling Dependabot PRs for Lock Files
 
-Dependabot automatically opens PRs to update pinned GitHub Actions SHAs referenced in workflows. Because the `.lock.yml` files are generated, a Dependabot PR that touches a source workflow will require a recompile step:
+Dependabot automatically opens PRs to update pinned GitHub Actions SHAs referenced in workflows by editing the generated `.lock.yml` files under `.github/workflows/`.
 
-1. Check out the Dependabot branch locally.
-2. Apply the updated action version to the appropriate `.md` source file.
-3. Recompile with the Dependabot flag:
+In this repository, the `.md` workflow sources only contain gh-aw frontmatter/description and do **not** contain the actual `uses:` pins. The `.lock.yml` files are therefore the authoritative source of pinned SHAs for CI.
+
+For a Dependabot PR that only changes `.lock.yml` files:
+
+1. Review the proposed `.lock.yml` changes to ensure they look reasonable.
+2. Do **not** edit the corresponding `.md` workflow source files.
+3. Do **not** re-run `gh aw compile` for these PRs, as that may overwrite Dependabot's updates.
+4. If the changes are acceptable and CI is green, merge the PR.
+
+If in the future a Dependabot PR (or a manual change) modifies a `.md` workflow source file that actually contains action pins, then you should recompile to keep the lock files in sync:
+
+1. Check out the branch locally.
+2. Run:
    ```bash
    gh aw compile --dependabot
    ```
-4. Commit the updated `.md` source and the regenerated `.lock.yml`, then push to the Dependabot branch.
-
-This bundles the source change and the compiled output into a single commit so CI stays green.
+3. Commit the updated `.md` source and the regenerated `.lock.yml` together, then push the branch.
