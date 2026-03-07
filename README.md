@@ -2,6 +2,7 @@
 
 [![Agenti Reviewer](https://github.com/steffenkoenig/agenti/actions/workflows/agenti-reviewer.lock.yml/badge.svg)](https://github.com/steffenkoenig/agenti/actions/workflows/agenti-reviewer.lock.yml)
 [![Issue Implementer](https://github.com/steffenkoenig/agenti/actions/workflows/issue-implementer.lock.yml/badge.svg)](https://github.com/steffenkoenig/agenti/actions/workflows/issue-implementer.lock.yml)
+[![Stale Issue Janitor](https://github.com/steffenkoenig/agenti/actions/workflows/stale-issue-janitor.lock.yml/badge.svg)](https://github.com/steffenkoenig/agenti/actions/workflows/stale-issue-janitor.lock.yml)
 
 **agenti** is an AI-powered, self-evolving repository management system built on [GitHub Agentic Workflows (gh-aw)](https://github.com/github/gh-aw). It deploys a team of autonomous AI agents that continuously audit your codebase, open GitHub Issues for findings, implement those issues as pull requests, and even improve the agents themselves — all on a recurring schedule with no human intervention required.
 
@@ -12,6 +13,7 @@ Three agentic workflows run on a schedule and keep the repository healthy:
 | **Agenti Reviewer** | Every 2 hours (configurable) | Audits the repository holistically and opens GitHub Issues for any improvements it finds |
 | **Issue Implementer** | Every 2 hours (configurable) | Picks up open GitHub Issues, implements the changes, and opens pull requests |
 | **Security Auditor** | Weekly (configurable) | Performs a dedicated security audit covering workflow permissions, pinned action SHAs, secret scopes, prompt injection detection, and agent boundary verification |
+| **Stale Issue Janitor** | Daily (configurable) | Scans open issues and closes any that have been resolved by merged PRs or existing work in `main` |
 
 At its core, agenti closes the loop between code review and code change: a reviewer agent scans the repository and files structured issues; an implementer agent picks those issues up and submits pull requests; and a workflow-management agent keeps all the underlying automation up to date. The result is a living repository that reflexively repairs and improves itself around the clock.
 
@@ -71,18 +73,21 @@ For each finding the reviewer opens a structured GitHub Issue containing a curre
 ```
 .github/
   agents/
-    agenti-reviewer.md          # Agent instructions for the reviewer
-    issue-implementer.agent.md  # Agent instructions for the implementer
-    security-auditor.agent.md   # Agent instructions for the security auditor
-    agentic-workflows.agent.md  # Shared gh-aw workflow conventions
+    agenti-reviewer.md                # Agent instructions for the reviewer
+    issue-implementer.agent.md        # Agent instructions for the implementer
+    security-auditor.agent.md         # Agent instructions for the security auditor
+    stale-issue-janitor.agent.md      # Agent instructions for the stale issue janitor
+    agentic-workflows.agent.md        # Shared gh-aw workflow conventions
   workflows/
-    agenti-reviewer.md          # Workflow definition (source)
-    agenti-reviewer.lock.yml    # Compiled workflow (do not edit manually)
-    issue-implementer.md        # Workflow definition (source)
-    issue-implementer.lock.yml  # Compiled workflow (do not edit manually)
-    security-auditor.md         # Workflow definition (source)
-    security-auditor.lock.yml   # Compiled workflow (do not edit manually)
-    copilot-setup-steps.yml     # Environment setup for Copilot Agent
+    agenti-reviewer.md                # Workflow definition (source)
+    agenti-reviewer.lock.yml          # Compiled workflow (do not edit manually)
+    issue-implementer.md              # Workflow definition (source)
+    issue-implementer.lock.yml        # Compiled workflow (do not edit manually)
+    security-auditor.md               # Workflow definition (source)
+    security-auditor.lock.yml         # Compiled workflow (do not edit manually)
+    stale-issue-janitor.md            # Workflow definition (source)
+    stale-issue-janitor.lock.yml      # Compiled workflow (do not edit manually)
+    copilot-setup-steps.yml           # Environment setup for Copilot Agent
 ```
 **Safe-output limits per run:** max 10 issues · max 10 comments · max 1 noop
 
@@ -97,7 +102,19 @@ An **Autonomous Software Engineer** that fetches all open GitHub Issues, priorit
 
 **Safe-output limits per run:** max 5 pull requests · max 10 comments · max 1 noop
 
-### 3. Agentic Workflows Agent (`agentic-workflows`)
+### 3. Stale Issue Janitor (`stale-issue-janitor`)
+
+A **Janitorial Agent** that runs daily and keeps the issue backlog clean. It scans all open issues and closes any that have been resolved — either because a merged pull request references them (via `Closes #N`, `Fixes #N`, or `Resolves #N`) or because the work they requested is demonstrably present in the `main` branch. Before closing an issue the agent posts an explanatory comment citing the reason. Issues that are old but not clearly resolved are labeled `stale` for human review.
+
+Guard rails prevent runaway closures:
+- Only closes issues that are **at least 7 days old**
+- Never closes issues that have an **open pull request** actively implementing them
+- Never closes issues labeled `in-progress`, `do-not-close`, or `pinned`
+- Caps at **10 close operations per run**
+
+**Safe-output limits per run:** max 10 issue updates · max 10 comments · max 1 noop
+
+### 4. Agentic Workflows Agent (`agentic-workflows`)
 
 A **Dispatcher / Workflow Engineer** helper agent intended for manual, on-demand use (there is no scheduled workflow that runs it automatically). It routes requests to specialized sub-prompts for:
 
@@ -154,6 +171,7 @@ Agent behavior is defined in plain-English markdown files under `.github/agents/
 |---|---|---|---|
 | **Agenti Reviewer** | Every 2 hours | `schedule` / `workflow_dispatch` | Audits the repo and opens GitHub Issues |
 | **Issue Implementer** | Every 2 hours | `schedule` / `workflow_dispatch` | Implements open issues and opens PRs |
+| **Stale Issue Janitor** | Daily | `schedule` / `workflow_dispatch` | Closes resolved issues and labels stale ones |
 | **Copilot Setup Steps** | On push / manual | `push` / `workflow_dispatch` | Provisions the gh-aw CLI environment |
 
 Both primary workflows run only on the `main` branch and use a concurrency group to prevent parallel runs of the same workflow.
@@ -166,6 +184,7 @@ Both primary workflows run only on the `main` branch and use a concurrency group
 gh workflow run "Agenti Reviewer"
 gh workflow run "Issue Implementer"
 gh workflow run "Security Auditor"
+gh workflow run "Stale Issue Janitor"
 ```
 
 ### Let it run automatically
@@ -174,8 +193,9 @@ gh workflow run "Security Auditor"
 gh run list --workflow "Agenti Reviewer"
 gh run list --workflow "Issue Implementer"
 gh run list --workflow "Security Auditor"
+gh run list --workflow "Stale Issue Janitor"
 ```
-Once the repository secrets are set and GitHub Actions is enabled, both workflows will trigger on their two-hour cron schedules automatically. No further action is required.
+Once the repository secrets are set and GitHub Actions is enabled, all scheduled workflows will trigger automatically. No further action is required.
 
 ### Customize the agents
 
