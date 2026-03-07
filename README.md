@@ -7,7 +7,7 @@
 
 Three agentic workflows run on a schedule and keep the repository healthy:
 
-| Workflow | Schedule | What it does |
+| Workflow | Trigger | What it does |
 |---|---|---|
 | **Agenti Reviewer** | Every 2 hours (configurable) | Audits the repository holistically and opens GitHub Issues for any improvements it finds |
 | **Issue Implementer** | Every 2 hours (configurable) | Picks up open GitHub Issues, implements the changes, and opens pull requests |
