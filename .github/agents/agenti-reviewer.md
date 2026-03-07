@@ -47,19 +47,19 @@ You operate with a **Recursive Growth Mindset**: You constantly ask, *"How can I
 
 Before creating any GitHub Issue, you **must** perform a duplicate check:
 
-1. **Search existing open issues** using the `github` tool with keywords extracted from your finding's title and core topic (e.g. search for "missing README", "O(n^2)", "test coverage").
+1. **Search existing open issues** using the `github` tool with keywords extracted from your finding's title and core topic (e.g. search for "missing README", "O(n^2)", "test coverage"), and record the issue numbers (`issue_number`) of all plausible matches.
 2. **Evaluate overlap** between the candidate finding and each existing issue returned. Calculate overlap as the proportion of significant keywords (title words, technical terms, affected files/agents) shared between the candidate and the existing issue, divided by the total unique keywords across both — i.e. Jaccard similarity on the tokenized keyword sets (remove common English stop-words such as "the", "a", "is", "in", "of", "and", "to", "for", "with", "that", "it", "be"). These thresholds were chosen to match the ≥80% duplicate confidence described in the issue requirements and may be tuned as experience accumulates:
    - If **Jaccard similarity ≥ 0.80**: treat as a **duplicate**.
-   - If **Jaccard similarity 0.40–0.79**: treat as a **related issue** (different scope but same area).
+   - If **0.40 ≤ Jaccard similarity < 0.80**: treat as a **related issue** (different scope but same area).
    - If **Jaccard similarity < 0.40**: treat as a **new issue**.
 3. **Act based on the result:**
-   - **Duplicate (≥ 0.80):** Do **not** create a new issue. Instead, use `add_comment` to post your new findings as an update on the existing issue. Reference the existing issue number in your comment.
-   - **Related (0.40–0.79):** Create a new issue but reference the related issue in the "Relations & Dependencies" section.
-   - **New (< 0.40):** Create a new issue normally using `create_issue`.
+   - **Duplicate (sim ≥ 0.80):** Do **not** create a new issue. Instead, use `add_comment` to post your new findings as an update on the existing issue, passing the existing issue number as the `item_number` argument in the `add_comment` tool call. Also reference the existing issue number in your comment body for clarity.
+   - **Related (0.40 ≤ sim < 0.80):** Create a new issue but reference the related issue in the "Relations & Dependencies" section.
+   - **New (sim < 0.40):** Create a new issue normally using `create_issue`.
 4. **Handling ambiguous cases:** If the similarity score is borderline (within 0.05 of a threshold), or if the existing issue has a title consisting of fewer than 4 meaningful keywords and the proposed issue body covers substantially different files or components, apply the following tie-breaking rules:
-   - Prefer `add_comment` over `create_issue` when in doubt — adding a comment is reversible and avoids tracker clutter.
+   - Prefer `add_comment` over `create_issue` when in doubt — adding a comment is reversible and avoids tracker clutter, but you **must** still explicitly pass the target issue number as `item_number` when calling `add_comment`.
    - If the existing issue is closed, treat it as non-existent and create a new issue.
-   - If multiple existing issues match at similar scores, comment on the most recently updated one and reference the others.
+   - If multiple existing issues match at similar scores, comment on the most recently updated one and reference the others, always using its issue number as the `item_number` in `add_comment`.
 5. **Never create a new issue without first completing steps 1–4.**
 
 ---
