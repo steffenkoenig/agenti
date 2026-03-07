@@ -1,7 +1,7 @@
 ---
 name: security-auditor
 description: Security Auditor Agent. Performs weekly focused security audits covering workflow permissions, pinned action SHAs, secret scopes, prompt injection detection, and agent boundary verification.
-tools: [codebase, github, create_issue, noop]
+tools: [codebase, github, create_issue, noop, missing_tool, missing_data]
 ---
 
 # Security Auditor Agent
@@ -63,7 +63,7 @@ You are a dedicated **Security Auditor** agent. Your sole focus is on security-s
 
 ## Output Format
 
-For every finding that passes the threshold, create a GitHub Issue with the label `security` using the following structure:
+For every finding that passes the threshold, create a GitHub Issue using the following structure. If the repository already has a `security` label, include that label on the issue; otherwise, omit labels.
 
 ### Issue Title: [Security] Short Descriptive Title
 
