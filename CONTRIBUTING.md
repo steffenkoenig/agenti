@@ -55,7 +55,7 @@ Key files to review:
 
 | Path | Purpose |
 |------|---------|
-| `.github/agents/*.agent.md` | Agent instruction files (the source of truth for agent behaviour) |
+| `.github/agents/*.md` | Agent instruction files (the source of truth for agent behaviour) |
 | `.github/workflows/*.md` | Workflow source files (human-readable, compiled to lock files) |
 | `.github/workflows/*.lock.yml` | Compiled lock files (generated — do **not** edit by hand) |
 | `.github/workflows/copilot-setup-steps.yml` | Environment bootstrap for GitHub Copilot Agent |
@@ -79,12 +79,13 @@ improvements it finds.  Safe outputs: `create-issue` (max 10), `add-comment`
 
 Runs on a schedule.  Reads open GitHub Issues, prioritises them, and submits
 pull requests with the required changes.  Safe outputs: `create-pull-request`
-(max 5), `add-comment` (max 10), `noop` (max 1).
+(max 5), `add-comment` (max 10).  (`noop` is added implicitly by the compiler
+and is not declared in the workflow source.)
 
 ### How It All Fits Together
 
 ```
-.github/agents/*.agent.md   ←  edit these to change agent behaviour
+.github/agents/*.md         ←  edit these to change agent behaviour
         │
         │ referenced by
         ▼
@@ -114,7 +115,8 @@ can execute them, but they are always derived from the `.md` sources.
 
 ### Where Agent Instructions Live
 
-- **Agent personality / behaviour**: `.github/agents/<name>.agent.md`
+- **Agent personality / behaviour**: files under `.github/agents/` (e.g.
+  `agenti-reviewer.md`, `issue-implementer.agent.md` — naming varies)
 - **Workflow configuration** (triggers, permissions, safe-outputs):
   `.github/workflows/<name>.md`
 
