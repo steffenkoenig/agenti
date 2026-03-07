@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v1","frontmatter_hash":"68615192845467894b35cb750539758544b6d4d525943d7d62ee398e1aa4496f","compiler_version":"v0.53.6"}
+# gh-aw-metadata: {"schema_version":"v1","frontmatter_hash":"e4951c0f7839f58a87d295f183227c2b9832e788b66208fbf53ebe96e92c144b","compiler_version":"v0.53.6"}
 
 name: "Issue Implementer"
 "on":
@@ -49,9 +49,9 @@ jobs:
     needs: pre_activation
     # zizmor: ignore[dangerous-triggers] - workflow_run trigger is secured with role and fork validation
     if: >
-      ((needs.pre_activation.outputs.activated == 'true') && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')) &&
-      ((github.event_name != 'workflow_run') || ((github.event.workflow_run.repository.id == github.repository_id) &&
-      (!(github.event.workflow_run.repository.fork))))
+      ((needs.pre_activation.outputs.activated == 'true') && ((github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') &&
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'))) && ((github.event_name != 'workflow_run') ||
+      ((github.event.workflow_run.repository.id == github.repository_id) && (!(github.event.workflow_run.repository.fork))))
     runs-on: ubuntu-slim
     permissions:
       contents: read
@@ -1138,7 +1138,9 @@ jobs:
             await main();
 
   pre_activation:
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    if: >
+      (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && (github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-slim
     outputs:
       activated: ${{ steps.check_membership.outputs.is_team_member == 'true' }}

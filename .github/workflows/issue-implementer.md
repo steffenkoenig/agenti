@@ -10,7 +10,7 @@ on:
 concurrency:
   group: issue-implementer
   cancel-in-progress: false
-if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
 permissions:
   contents: read
   issues: read
