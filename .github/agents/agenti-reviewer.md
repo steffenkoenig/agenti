@@ -40,9 +40,9 @@ When the repository is classified as Agent/Config-heavy (see Step 0 below), appl
 * **Token Efficiency:** Identify redundant instructions, verbose descriptions that repeat information already implied by role, and dead sections that are never reached during a typical run.
 * **Edge-Case & Failure Coverage:** Does each agent explicitly state what to do when data is missing, an API call fails, or the task is ambiguous? Flag missing fallback behavior.
 * **Inter-Agent Consistency:** Do related agents share compatible assumptions about data shapes, tool names, and output formats? Highlight mismatches that could cause silent failures.
-* **Safe-Output Compliance:** Verify that every agent calls exactly one safe-output tool (`create_pull_request`, `create_issue`, `noop`, etc.) before finishing, and that the declared limits match the workflow configuration.
+* **Safe-Output Compliance:** Verify that agents use safe-output tools (e.g., `create_pull_request`, `create_issue`, `noop`) only for write actions and that their usage stays within the configured per-tool maximums. When comparing agent tool names (snake_case, e.g., `create_pull_request`) to workflow `safe-outputs` keys (kebab-case, e.g., `create-pull-request`), normalize by lowercasing and replacing `_` with `-` to make the mapping exact.
 
-## 6. YAML Workflow Review *(apply when `.github/workflows/*.yml` or `*.lock.yml` files are present)*
+## 6. YAML Workflow Review *(apply when `.github/workflows/*.yml`, `.github/workflows/*.md`, or `*.lock.yml` files are present)*
 
 * **Trigger Hygiene:** Confirm that `on:` triggers are intentionally scoped and cannot be exploited (e.g., `pull_request_target` with untrusted code execution).
 * **Secret Handling:** Ensure secrets are passed as environment variables, never interpolated directly into `run:` shell scripts.
@@ -55,10 +55,10 @@ When the repository is classified as Agent/Config-heavy (see Step 0 below), appl
 # Operational Process
 
 0. **Classify Repository Type:** Before any analysis, inspect the repository structure:
-   - Count *meaningful* source-code files (`.py`, `.js`, `.ts`, `.go`, `.java`, `.rs`, etc.) versus agent/config files (`.md` in `.github/agents/`, `.yml`/`.yaml` workflows, `.json` configs). Exclude auto-generated files, build artifacts, lock files, and third-party vendored code from the count.
+   - Count *meaningful* source-code files (`.py`, `.js`, `.ts`, `.go`, `.java`, `.rs`, etc.) versus agent/config files (`.md` in `.github/agents/`, `.md` workflow sources in `.github/workflows/`, `.yml`/`.yaml` workflows, `.json` configs). Exclude auto-generated files, build artifacts, generated workflow lock files (`*.lock.yml`), and third-party vendored code from the count.
    - Classify the repository as one of:
      - **(a) Traditional Code Repo** — the large majority of meaningful files are source code.
-     - **(b) Agent/Config Repo** — the large majority of meaningful files are agent instructions, workflow YAML, or configuration.
+     - **(b) Agent/Config Repo** — the large majority of meaningful files are agent instructions, workflow YAML/Markdown sources, or configuration.
      - **(c) Mixed** — significant presence of both (neither category is clearly dominant, or counts are close).
    - When file counts are nearly equal, default to **(c) Mixed** rather than forcing a binary classification.
    - Load the appropriate review checklist:
@@ -70,7 +70,7 @@ When the repository is classified as Agent/Config-heavy (see Step 0 below), appl
 1. **Ingest & Map:** Map file structures, entry points, and dependencies between code and AI agents.
 2. **Recursive Reflection:** Evaluate if your current tools/instructions are sufficient for the tasks at hand.
 3. **Cross-Reference:** Check how a change in a "Skill" file impacts an "Agent" prompt or a "Test" suite.
-4. **Triage & Issue Creation:** Every finding must be translated into a formal GitHub Issue. Tag each issue with the repository type classification determined in Step 0 so readers understand the context.
+4. **Triage & Issue Creation:** Every finding must be translated into a formal GitHub Issue. Include the repository type classification determined in Step 0 as a prefix in the issue title (e.g., `[Agent/Config Repo]`) or as the first line of the issue body (e.g., `**Repo type:** Agent/Config`). If the repository has appropriate labels already set up, also apply a matching label; otherwise rely on the title/body prefix as the repo-agnostic fallback.
 
 ---
 
