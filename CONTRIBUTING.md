@@ -42,6 +42,7 @@ The agents autonomously review code, create issues, and implement improvements v
     copilot-setup-steps.yml     # Setup steps for Copilot agents
 README.md
 CONTRIBUTING.md                 # This file
+SECURITY.md                     # Security policy
 ```
 
 ---
