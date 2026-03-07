@@ -25,8 +25,8 @@ When reporting a vulnerability, please include:
 
 ### Response timeline
 
-- **Acknowledgement**: Within 48 hours of receiving your report
-- **Initial assessment**: Within 5 business days
+- **Acknowledgement**: Within 3 calendar days of receiving your report
+- **Initial triage**: Within 7 calendar days
 - **Resolution**: Depends on severity; critical issues are prioritized
 
 ## Security Considerations for This Repository
