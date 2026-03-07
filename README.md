@@ -1,8 +1,9 @@
 # agenti
 
-A self-improving GitHub repository powered by GitHub Copilot agentic workflows. **agenti** automatically audits itself for improvements, files issues, and implements those issues — all without human intervention.
+[![Agenti Reviewer](https://github.com/steffenkoenig/agenti/actions/workflows/agenti-reviewer.lock.yml/badge.svg)](https://github.com/steffenkoenig/agenti/actions/workflows/agenti-reviewer.lock.yml)
+[![Issue Implementer](https://github.com/steffenkoenig/agenti/actions/workflows/issue-implementer.lock.yml/badge.svg)](https://github.com/steffenkoenig/agenti/actions/workflows/issue-implementer.lock.yml)
 
-## How It Works
+**agenti** is an AI-powered, self-evolving repository management system built on [GitHub Agentic Workflows (gh-aw)](https://github.com/github/gh-aw). It deploys a team of autonomous AI agents that continuously audit your codebase, open GitHub Issues for findings, implement those issues as pull requests, and even improve the agents themselves — all on a recurring schedule with no human intervention required.
 
 Three agentic workflows run on a schedule and keep the repository healthy:
 
@@ -12,27 +13,60 @@ Three agentic workflows run on a schedule and keep the repository healthy:
 | **Issue Implementer** | Every 2 hours (configurable) | Picks up open GitHub Issues, implements the changes, and opens pull requests |
 | **Security Auditor** | Weekly (configurable) | Performs a dedicated security audit covering workflow permissions, pinned action SHAs, secret scopes, prompt injection detection, and agent boundary verification |
 
-The schedule is defined in the `on.schedule` frontmatter of each workflow `.md` source file (e.g. `.github/workflows/agenti-reviewer.md`). Edit the `schedule` field and recompile to change the cadence.
+At its core, agenti closes the loop between code review and code change: a reviewer agent scans the repository and files structured issues; an implementer agent picks those issues up and submits pull requests; and a workflow-management agent keeps all the underlying automation up to date. The result is a living repository that reflexively repairs and improves itself around the clock.
 
-## Prerequisites
+## Table of Contents
 
-- A GitHub repository with **GitHub Copilot** enabled. Agentic workflows require a plan that includes GitHub Copilot (e.g. Copilot Business or Copilot Enterprise). See [GitHub's Copilot plans](https://docs.github.com/en/copilot/about-github-copilot/subscription-plans-for-github-copilot) for details.
-- The [`gh-aw`](https://github.github.com/gh-aw/introduction/overview/) CLI extension installed locally if you want to edit or recompile workflows:
-  ```bash
-  gh extension install github/gh-aw
-  ```
+- [Architecture](#architecture)
+- [Agents](#agents)
+- [Prerequisites](#prerequisites)
+- [Setup](#setup)
+- [Workflows](#workflows)
+- [Usage](#usage)
+- [Contributing](#contributing)
 
-## Setup
+## Architecture
 
-1. **Fork or clone this repository** into your GitHub account or organization.
+```
+┌─────────────────────────────────────────────────────┐
+│                   GitHub Repository                  │
+│                                                      │
+│  ┌──────────────────┐     ┌───────────────────────┐ │
+│  │  Agenti Reviewer │────▶│   GitHub Issues        │ │
+│  │  (every 2 hours) │     │   (findings & tasks)   │ │
+│  └──────────────────┘     └──────────┬────────────┘ │
+│                                       │              │
+│  ┌──────────────────┐                 │              │
+│  │ Issue Implementer│◀────────────────┘              │
+│  │  (every 2 hours) │                                │
+│  └────────┬─────────┘                                │
+│           │  Pull Requests                           │
+│           ▼                                          │
+│  ┌──────────────────┐                                │
+│  │  Main Branch     │                                │
+│  └──────────────────┘                                │
+│                                                      │
+│  ┌────────────────────────────────────┐              │
+│  │  Agentic Workflows Agent           │              │
+│  │  (manages .github/workflows/*.md)  │              │
+│  └────────────────────────────────────┘              │
+└─────────────────────────────────────────────────────┘
+```
 
-2. **Enable GitHub Copilot** for the repository (Settings → Copilot).
+Both scheduled agents run every two hours, are scoped to the `main` branch, and use a concurrency lock so only one instance of each agent runs at a time. All agent outputs go through a safe-outputs firewall that caps the number of issues, pull requests, and comments an agent can create per run, preventing runaway automation.
 
-3. **Grant the required permissions** to the `GITHUB_TOKEN` used by the workflows. The compiled lock files already declare the minimum permissions needed (`contents`, `issues`, `pull-requests`).
+## Agents
 
-4. The workflows run automatically on their schedule. You can also trigger them manually from the **Actions** tab using the `workflow_dispatch` event.
+### 1. Agenti Reviewer (`agenti-reviewer`)
 
-## Repository Structure
+A **Senior Architect / Repository Sentinel** that performs holistic, recursive audits of the entire repository. It reviews:
+
+- **Code & Infrastructure** — logic efficiency, modernization opportunities, DRY/SOLID violations
+- **Testing & Resilience** — coverage gaps, test quality, flaky tests
+- **Documentation** — bus-factor risks, docs that are out of sync with code
+- **Agents & Workflows (Recursive)** — reviews the other agents, proposes new specialist agents, and audits itself
+
+For each finding the reviewer opens a structured GitHub Issue containing a current-state/desired-state description, impact rating (Critical / Warning / Enhancement), a step-by-step proposed solution, and a checklist of acceptance criteria.
 
 ```
 .github/
@@ -50,25 +84,83 @@ The schedule is defined in the `on.schedule` frontmatter of each workflow `.md` 
     security-auditor.lock.yml   # Compiled workflow (do not edit manually)
     copilot-setup-steps.yml     # Environment setup for Copilot Agent
 ```
+**Safe-output limits per run:** max 10 issues · max 10 comments · max 1 noop
 
-> **Note:** The `.lock.yml` files are auto-generated by `gh aw compile`. Always edit the corresponding `.md` source file and then recompile.
+### 2. Issue Implementer (`issue-implementer`)
 
-## Customizing Workflows
+An **Autonomous Software Engineer** that fetches all open GitHub Issues, prioritizes them using explicit labels, community reactions, comments, and age, then implements up to 5 issues per run (subject to safe-output limits). For each run it:
 
-Edit the `.md` source file for the workflow you want to change, then recompile:
+1. Produces a detailed task list for the selected issues (understanding, affected files, implementation steps, tests, docs, acceptance criteria)
+2. Makes the required code changes
+3. Adds or updates tests and documentation
+4. Opens one or more pull requests referencing the implemented issues (possibly grouping several issues per pull request to honor safe-output limits)
+
+**Safe-output limits per run:** max 5 pull requests · max 10 comments · max 1 noop
+
+### 3. Agentic Workflows Agent (`agentic-workflows`)
+
+A **Dispatcher / Workflow Engineer** helper agent intended for manual, on-demand use (there is no scheduled workflow that runs it automatically). It routes requests to specialized sub-prompts for:
+
+- Creating and updating workflow definitions (`.github/workflows/*.md`)
+- Compiling `.md` sources to `.lock.yml` files via `gh aw compile`
+- Debugging failed workflow runs
+- Upgrading the gh-aw extension version across all workflows
+- Generating reports and shared reusable workflow components
+
+## Prerequisites
+
+| Requirement | Version | Purpose |
+|---|---|---|
+| [GitHub CLI (`gh`)](https://cli.github.com/) | ≥ 2.x | Required by gh-aw extension |
+| [gh-aw extension](https://github.com/github/gh-aw) | v0.53.6+ | Compiles and runs agentic workflows |
+| GitHub Copilot | Business or Enterprise | Powers the AI agents |
+| `COPILOT_GITHUB_TOKEN` secret | — | Repository secret used by workflows for API access |
+
+## Setup
+
+### 1. Fork or clone the repository
+
+```bash
+git clone https://github.com/steffenkoenig/agenti.git
+cd agenti
+```
+
+### 2. Install the GitHub CLI and gh-aw extension
 
 ```bash
 # Edit .github/workflows/agenti-reviewer.md, issue-implementer.md, or security-auditor.md, then:
 gh aw compile
 ```
 
-This regenerates the corresponding `.lock.yml` file. Commit both files together.
+### 3. Configure repository secrets
 
-To adjust agent behavior (prompts, constraints, output limits), edit the corresponding file under `.github/agents/`.
+In your repository settings, add the following secret:
+
+| Secret | Description |
+|---|---|
+| `COPILOT_GITHUB_TOKEN` | A GitHub token with `repo` and `copilot` scopes |
+
+### 4. Enable GitHub Actions
+
+Ensure GitHub Actions is enabled for your repository. The compiled lock files (`.github/workflows/*.lock.yml`) are already checked in and will be picked up automatically by GitHub Actions.
+
+### 5. (Optional) Edit agent prompts
+
+Agent behavior is defined in plain-English markdown files under `.github/agents/`. Edit these files to customize how the agents operate, then commit your changes. No recompilation is needed for agent prompt-only edits — recompilation is only required when you change a workflow definition file (`.github/workflows/*.md`).
+
+## Workflows
+
+| Workflow | Schedule | Trigger | Description |
+|---|---|---|---|
+| **Agenti Reviewer** | Every 2 hours | `schedule` / `workflow_dispatch` | Audits the repo and opens GitHub Issues |
+| **Issue Implementer** | Every 2 hours | `schedule` / `workflow_dispatch` | Implements open issues and opens PRs |
+| **Copilot Setup Steps** | On push / manual | `push` / `workflow_dispatch` | Provisions the gh-aw CLI environment |
+
+Both primary workflows run only on the `main` branch and use a concurrency group to prevent parallel runs of the same workflow.
 
 ## Usage
 
-### Trigger a workflow manually
+### Trigger manually
 
 ```bash
 gh workflow run "Agenti Reviewer"
@@ -76,14 +168,27 @@ gh workflow run "Issue Implementer"
 gh workflow run "Security Auditor"
 ```
 
-### View recent runs
+### Let it run automatically
 
 ```bash
 gh run list --workflow "Agenti Reviewer"
 gh run list --workflow "Issue Implementer"
 gh run list --workflow "Security Auditor"
 ```
+Once the repository secrets are set and GitHub Actions is enabled, both workflows will trigger on their two-hour cron schedules automatically. No further action is required.
 
-## License
+### Customize the agents
 
-No license has been specified for this project. All rights are reserved by the author unless otherwise stated.
+Open any file in `.github/agents/` in your editor. GitHub Copilot is enabled for markdown files in this repository, so you can use Copilot to help you refine agent instructions.
+
+After editing an agent file, simply commit your changes. Recompilation is only required if you also modify a workflow definition in `.github/workflows/*.md` (see the [Contributing](#contributing) section).
+
+## Contributing
+
+1. **Open an issue** — describe the bug, enhancement, or question. The Agenti Reviewer will periodically audit the repo and may open issues automatically too.
+2. **Fork & branch** — create a feature branch from `main`.
+3. **Make changes** — follow the existing code style; keep commits small and focused.
+4. **Compile workflows** — if you edit any `.github/workflows/*.md` file, run `gh aw compile` and commit the resulting `.lock.yml`.
+5. **Open a pull request** — reference the related issue in the PR description.
+
+> **Note:** The Issue Implementer agent runs every two hours and may implement open issues automatically.
