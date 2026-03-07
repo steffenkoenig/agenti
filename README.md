@@ -4,14 +4,16 @@ A self-improving GitHub repository powered by GitHub Copilot agentic workflows. 
 
 ## How It Works
 
-Two agentic workflows run on a schedule and keep the repository healthy:
+Two agentic workflows run in a coordinated sequence to keep the repository healthy:
 
-| Workflow | Schedule | What it does |
+| Workflow | Trigger | What it does |
 |---|---|---|
 | **Agenti Reviewer** | Every 2 hours (configurable) | Audits the repository holistically and opens GitHub Issues for any improvements it finds |
-| **Issue Implementer** | Every 2 hours (configurable) | Picks up open GitHub Issues, implements the changes, and opens pull requests |
+| **Issue Implementer** | After Agenti Reviewer completes | Picks up open GitHub Issues, implements the changes, and opens pull requests |
 
-The schedule is defined in the `on.schedule` frontmatter of each workflow `.md` source file (e.g. `.github/workflows/agenti-reviewer.md`). Edit the `schedule` field and recompile to change the cadence.
+The workflows follow a deliberate **Review → Implement** sequence: the `Issue Implementer` uses a `workflow_run` trigger so it only starts after `Agenti Reviewer` has finished. This prevents race conditions and ensures the implementer always works from the latest set of issues.
+
+The schedule is defined in the `on.schedule` frontmatter of `agenti-reviewer.md`. The `issue-implementer.md` uses a `workflow_run` trigger — edit the `workflow_run.workflows` field to change which workflow it follows.
 
 ## Prerequisites
 

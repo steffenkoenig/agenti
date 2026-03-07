@@ -1,7 +1,12 @@
 ---
 name: "Issue Implementer"
 on:
-  schedule: every 2 hours
+  workflow_run:
+    workflows: ["Agenti Reviewer"]
+    types: [completed]
+    branches:
+      - main
+  workflow_dispatch:
 concurrency:
   group: issue-implementer
   cancel-in-progress: false
