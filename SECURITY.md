@@ -2,160 +2,74 @@
 
 ## Supported Versions
 
-The following versions of **agenti** are currently supported with security updates:
+This repository contains GitHub Agentic Workflow (gh-aw) configurations and agent instructions. The following components are actively maintained:
 
-| Version | Supported          |
-| ------- | ------------------ |
-| main    | :white_check_mark: |
-
-Only the latest code on the `main` branch is actively maintained. No legacy version branches are currently supported.
-
----
+| Component | Maintained |
+| --- | --- |
+| `.github/workflows/*.md` (workflow sources) | ✅ Yes |
+| `.github/workflows/*.lock.yml` (compiled) | ✅ Yes |
+| `.github/agents/*.agent.md` | ✅ Yes |
 
 ## Reporting a Vulnerability
 
-We take security vulnerabilities seriously, especially given that **agenti** is an autonomous agent with access to a `COPILOT_GITHUB_TOKEN` for GitHub Copilot inference and separate GitHub API credentials (such as `GITHUB_TOKEN` or the MCP server token) that allow it to create pull requests, comment on issues, and interact with the GitHub API on a scheduled basis.
+**Please do not report security vulnerabilities through public GitHub Issues.**
 
-### How to Report
+To report a security vulnerability, use [GitHub's private vulnerability reporting](https://github.com/steffenkoenig/agenti/security/advisories/new). You will receive an acknowledgement within **72 hours** and a resolution update within **7 days**.
 
-**Please do NOT open a public GitHub Issue for security vulnerabilities.**
+Please include:
 
-Instead, use **[GitHub Private Vulnerability Reporting](../../security/advisories/new)** to disclose vulnerabilities privately:
+- A description of the vulnerability and its potential impact.
+- The affected file(s) and line numbers where applicable.
+- Steps to reproduce or a proof-of-concept.
+- Any suggested remediation.
 
-1. Navigate to the **Security → Advisories** tab of this repository and click **"Report a vulnerability"**.
-2. Fill in the details described in the [What to Include](#what-to-include-in-a-report) section below.
+## Security Model
 
-If you are unable to use GitHub's private reporting, you may contact the repository owner directly via GitHub ([@steffenkoenig](https://github.com/steffenkoenig)).
+### Agent Workflow Firewall (AWF)
 
----
+All agentic workflows execute inside the [Agent Workflow Firewall](https://github.github.com/gh-aw/reference/firewall/) sandbox. Outbound network traffic is restricted to an explicit domain allowlist. Review `GH_AW_INFO_ALLOWED_DOMAINS` in each `.lock.yml` file to understand the permitted domains for a given workflow.
 
-## Expected Response Timeline
+### Principle of Least Privilege
 
-| Action                              | Target Timeframe |
-| ----------------------------------- | ---------------- |
-| Acknowledgement of report           | Within 3 days    |
-| Initial triage and severity rating  | Within 7 days    |
-| Fix or mitigation plan communicated | Within 14 days   |
-| Patch released (for valid issues)   | Within 30 days   |
+Every workflow job requests only the GitHub token permissions it requires. The top-level `permissions:` block is set to `{}` (deny-all default) and individual jobs declare only the scopes they need. Review the `permissions:` blocks in each `.lock.yml` to verify.
 
-We will keep you informed throughout the process. If you have not received a response within the expected timeframe, please follow up.
+### Action Pinning
 
----
+Where possible, third-party `uses:` references in lock files are pinned to a full commit SHA to prevent supply-chain attacks via tag re-pointing. Some first-party gh-aw actions (for example `github/gh-aw/actions/setup`) intentionally use maintained version tags (such as `v0.53.6`). If you observe an unexpected mutable tag or branch reference in a non-gh-aw action, please report it.
 
-## What to Include in a Report
+### Safe Outputs
 
-To help us triage and reproduce the vulnerability quickly, please include:
-
-- **Description**: A clear summary of the vulnerability and its potential impact.
-- **Affected component**: Which file(s), workflow(s), or agent(s) are involved (e.g., `issue-implementer.agent.md`, `agenti-reviewer.agent.md`).
-- **Steps to reproduce**: A minimal, reproducible sequence of steps or a proof-of-concept.
-- **Impact**: What an attacker could achieve by exploiting this issue (e.g., token exfiltration, unauthorized code commits, prompt injection).
-- **Suggested fix** (optional): If you have a proposed mitigation or patch.
-
----
-
-## AI Agent-Specific Security Concerns
-
-**agenti** uses Large Language Model (LLM)-based agents to autonomously process GitHub issues and create pull requests. This introduces attack vectors that are specific to AI-powered systems.
+AI agents communicate with the GitHub API exclusively through the `safe-outputs` mechanism, which enforces per-run rate limits (e.g., at most 5 pull requests or 10 issues per workflow run). Agents cannot directly call GitHub write APIs.
 
 ### Prompt Injection
 
-Prompt injection occurs when untrusted input (e.g., issue titles, issue bodies, PR descriptions, or code comments) manipulates the agent's instructions in unintended ways.
+Agent instructions are reviewed by the [`security-auditor`](.github/agents/security-auditor.agent.md) specialist agent for prompt injection vulnerabilities, ensuring that user-supplied content (issue bodies, PR titles, comments) cannot hijack agent behaviour.
 
-**Risk**: A malicious actor could craft a GitHub Issue with content designed to override agent instructions — for example, instructing the agent to exfiltrate secrets, modify unrelated files, or bypass safety constraints.
+## Automated Security Auditing
 
-**Mitigations in place**:
-- Agent instructions are defined in structured files under `.github/agents/` (using either a `.md` or `.agent.md` extension, e.g., `agenti-reviewer.md`, `issue-implementer.agent.md`) with explicit safe-output constraints declared per workflow.
-- The `safe-outputs` system limits permitted actions on a per-workflow basis — for example, the `agenti-reviewer` workflow may only create issues and add comments, while `issue-implementer` may only create pull requests and add comments. Neither workflow can perform arbitrary API calls beyond these defined outputs.
-- Agents do not have direct `git push` access; all code changes go through pull requests that can be reviewed before merging.
+A dedicated `Security Audit` workflow (`.github/workflows/security-audit.md`) runs automatically:
 
-**Please report** any issue or pull request content that you believe could be used as a prompt injection payload.
+- On every pull request that modifies files under `.github/`.
+- On a monthly schedule.
+- On demand via `workflow_dispatch`.
 
-### Token Permission Model
+The workflow uses the [`security-auditor`](.github/agents/security-auditor.agent.md) agent to check all six security domains:
 
-This repository uses a **two-token model** in its agentic workflows:
+1. Prompt Injection Detection
+2. Permission Audit
+3. Secret Hygiene
+4. Action Pin Audit
+5. Network Allowlist Review
+6. Output Injection Audit
 
-- `COPILOT_GITHUB_TOKEN` is provided to the Copilot/agent engine for generating plans and code, but it is **not** the primary token used to perform GitHub API operations on the repository.
-- Separate GitHub tokens (e.g., `GITHUB_MCP_SERVER_TOKEN`, `GH_AW_GITHUB_TOKEN`, `GITHUB_TOKEN`) are used by workflows to call the GitHub API and carry out repository-level actions (issues, pull requests, code changes).
+Findings are reported as GitHub Issues with severity labels.
 
-Key facts about these GitHub API tokens:
+## Known Security Considerations
 
-- They are scoped to repository-level operations and do **not** have organization-level administrative permissions.
-- They are stored as GitHub Actions secrets; GitHub automatically redacts their values from logs, and workflows are designed not to print raw token values (only derived data such as API responses or status messages).
-- All agent actions are limited by the `safe-outputs` mechanism defined in each workflow.
+### Action SHA Pinning
 
-If you believe any of these tokens are over-privileged, mis-scoped, or have been exposed, please report it immediately using the private disclosure process above.
+Where possible, third-party `uses:` references in lock files are pinned to full commit SHAs by the `gh aw compile` toolchain. Some first-party gh-aw actions (for example `github/gh-aw/actions/setup`) intentionally use maintained version tags (such as `v0.53.6`). Never edit lock files manually — always recompile from the `.md` source.
 
----
+### COPILOT_GITHUB_TOKEN Scope
 
-## Out of Scope
-
-The following are **not** considered security vulnerabilities for this project:
-
-- Issues that require the attacker to already have write access to the repository.
-- Theoretical vulnerabilities with no realistic exploit path.
-- Rate limiting or denial-of-service on the GitHub API (report these to GitHub directly).
-- Bugs in GitHub Actions itself (report these to GitHub).
-- Issues in third-party actions or dependencies that are not modified by this repository.
-
----
-
-## Disclosure Policy
-
-We follow a **coordinated disclosure** model:
-
-1. Reporter submits a private report.
-2. We triage, confirm, and develop a fix.
-3. Once a fix is released, we will credit the reporter in the security advisory (unless they prefer to remain anonymous).
-4. Public disclosure happens after the fix is available.
-
-Thank you for helping keep **agenti** and its users safe.
-## Reporting a Vulnerability
-
-**Please do not report security vulnerabilities through public GitHub issues.**
-
-To report a security vulnerability, please use [GitHub's private vulnerability reporting](https://github.com/steffenkoenig/agenti/security/advisories/new).
-
-Alternatively, you can email the repository owner directly. You can find contact information in the [GitHub profile](https://github.com/steffenkoenig).
-
-### What to include
-
-When reporting a vulnerability, please include:
-
-- A description of the vulnerability and its potential impact
-- Steps to reproduce the issue
-- Any relevant logs, screenshots, or proof-of-concept code
-- Your suggested fix (if any)
-
-### Response timeline
-
-- **Acknowledgement**: Within 48 hours of receiving your report
-- **Initial assessment**: Within 5 business days
-- **Resolution**: Depends on severity; critical issues are prioritized
-
-## Security Considerations for This Repository
-
-This repository contains autonomous AI agent configurations that:
-
-- **Create pull requests** automatically on a schedule
-- **Read repository contents** and GitHub issue data
-- **Execute agent workflows** via GitHub Actions
-
-### Threat model
-
-Key security concerns for this repo include:
-
-- **Prompt injection**: Malicious content in issues/PRs could influence agent behavior. All issue and PR bodies are treated as untrusted data.
-- **Token permissions**: Agents use the minimum required GitHub token permissions (see workflow frontmatter `permissions:` blocks).
-- **Safe-output limits**: Workflow configurations cap the number of GitHub API actions per run to prevent runaway automation.
-- **Secrets exposure**: No secrets should ever be committed to agent instruction files or workflow definitions.
-
-### Responsible disclosure
-
-We are committed to working with security researchers to investigate and address reported vulnerabilities. We request that you:
-
-1. Give us reasonable time to investigate and mitigate the issue before any public disclosure.
-2. Avoid accessing or modifying data that does not belong to you.
-3. Act in good faith and avoid disrupting the repository's normal operations.
-
-We will not take legal action against researchers who responsibly disclose vulnerabilities following these guidelines.
+The `COPILOT_GITHUB_TOKEN` secret used by agentic workflows should be scoped to the minimum permissions required. Periodically audit the token's organisation-level permissions via the GitHub token settings page.

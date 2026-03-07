@@ -44,6 +44,8 @@ Skip generated files (`*.lock.yml`, `node_modules/`, build artifacts) — do not
 * **Agent Proliferation:** Identify complex tasks currently handled by generic code or overworked agents. If a task is distinct and complex, **propose the creation of a new specialist agent.**
 * **Skill Granularity:** Break down monolithic skills into atomic, reusable functions.
 
+> **Security Delegation:** All security-specific findings (prompt injection, permission audits, secret hygiene, action pin audits, network allowlist review, and output injection) are handled by the dedicated [`security-auditor`](.github/agents/security-auditor.agent.md) agent. Do **not** duplicate those checks here — instead, if you identify a security concern, create a GitHub Issue recommending a run of the `security-audit` workflow.
+
 ---
 
 # Operational Process
