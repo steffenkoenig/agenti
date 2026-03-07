@@ -53,6 +53,7 @@ Both workflows are powered by GitHub Copilot. The agent behavior is defined in p
     issue-implementer.md            # Workflow source (edit this, not the .lock.yml)
     issue-implementer.lock.yml      # Compiled workflow — DO NOT edit manually
     copilot-setup-steps.yml         # Environment setup for the Copilot Agent runner
+  copilot-instructions.md           # PR Architect agent instructions (review and advisory only)
 CONTRIBUTING.md                     # This file
 README.md                           # Project overview and setup instructions
 ```
