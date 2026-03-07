@@ -27,9 +27,22 @@ The schedule is defined in the `on.schedule` frontmatter of each workflow `.md` 
 
 2. **Enable GitHub Copilot** for the repository (Settings → Copilot).
 
-3. **Grant the required permissions** to the `GITHUB_TOKEN` used by the workflows. The compiled lock files already declare the minimum permissions needed (`contents`, `issues`, `pull-requests`).
+3. **Configure a token with write access** for the workflows. They use `secrets.GH_AW_GITHUB_MCP_SERVER_TOKEN || secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN` to create issues and pull requests, so at least one of these must have write access for `contents`, `issues`, and `pull-requests`.
+   - **Recommended:** Create a fine-grained personal access token (PAT) with the minimum required repository permissions — Contents (Read and write), Issues (Read and write), Pull requests (Read and write) — and store it as `GH_AW_GITHUB_TOKEN` (or `GH_AW_GITHUB_MCP_SERVER_TOKEN`) in the repository's Secrets.
+   - **Alternative:** Grant the built-in `GITHUB_TOKEN` write permissions for `contents`, `issues`, and `pull-requests` via your repository or organization settings, and ensure the workflow job `permissions:` are compatible.  
+   The compiled `.lock.yml` files declare these minimum permissions; you must still ensure the chosen token actually has write access.
 
-4. The workflows run automatically on their schedule. You can also trigger them manually from the **Actions** tab using the `workflow_dispatch` event.
+4. **Create required secrets for Copilot workflows**:
+   - Create a **personal access token (classic)** with at least:
+     - `repo` (or `public_repo` if you only work with public repositories)
+     - `workflow`
+   - Add it as a repository or organization secret named **`COPILOT_GITHUB_TOKEN`** (Settings → Secrets and variables → Actions → *New repository secret*).
+   - For workflows or `gh aw` runs that need to perform write operations (creating/updating issues, branches, or pull requests), configure:
+     - **`GH_AW_GITHUB_TOKEN`** – a token used by the `gh-aw` CLI for authenticated write operations.
+     - **`GH_AW_GITHUB_MCP_SERVER_TOKEN`** – a token used by the MCP server backing `gh-aw` when making GitHub write calls.
+   - You can reuse the same PAT for all three secrets or use separate tokens with equivalent scopes, depending on your security policy.
+
+5. The workflows run automatically on their schedule. You can also trigger them manually from the **Actions** tab using the `workflow_dispatch` event.
 
 ## Repository Structure
 
